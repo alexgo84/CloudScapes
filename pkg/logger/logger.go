@@ -9,7 +9,36 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func InitLogger(dev bool) error {
+type LogLevel int
+
+const (
+	INFO LogLevel = iota
+	DEBUG
+	WARN
+	ERROR
+)
+
+// Log will log a message to console and to file. Recommended usage:
+//
+// logger.Log(logger.INFO, "the message", logger.String("name", "john doe"))
+func Log(level LogLevel, msg string, fields ...zap.Field) {
+	switch level {
+	case DEBUG:
+		zap.L().Debug(msg, fields...)
+	case INFO:
+		zap.L().Info(msg, fields...)
+	case WARN:
+		zap.L().Warn(msg, fields...)
+	case ERROR:
+		zap.L().Error(msg, fields...)
+	}
+}
+
+// InitLogger will initialize a logger that logs messages both to console and to file
+// dev will determine the log level. If false, the log level is INFO, otherwise DEBUG.
+// if filename is provided it will be used for the name of the log file. otherwise,
+// the name will be determined by the current time and date
+func InitLogger(dev bool, filename *string) error {
 	if err := createDirIfNotExists(); err != nil {
 		return err
 	}
@@ -22,7 +51,7 @@ func InitLogger(dev bool) error {
 	fileEncoder := getFileEncoder()
 	consoleEncoder := getConsoleEncoder()
 
-	file, err := getFileHandle()
+	file, err := getFileHandle(filename)
 	if err != nil {
 		return err
 	}
@@ -37,13 +66,18 @@ func InitLogger(dev bool) error {
 	return nil
 }
 
-func getFileHandle() (*os.File, error) {
+func getFileHandle(filenameOverride *string) (*os.File, error) {
 	path, err := getLogDirPath()
 	if err != nil {
 		return nil, err
 	}
 
-	filename := fmt.Sprintf("%s/Log File %v.txt", path, time.Now().Format("01-02-2006 15:04:05"))
+	var filename string
+	if filenameOverride != nil {
+		filename = fmt.Sprintf("%s/%s", path, *filenameOverride)
+	} else {
+		filename = fmt.Sprintf("%s/Log File %v.txt", path, time.Now().Format("01-02-2006 15:04:05"))
+	}
 	return os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 }
 
