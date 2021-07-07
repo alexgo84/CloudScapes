@@ -1,0 +1,2 @@
+2021-07-07T18:13:33.989764Z	info	server/main.go:17	sugared log arg1 2 arg3
+2021-07-07T18:13:33.989895Z	info	server/main.go:18	nonsugared log %v %v %v	{"arg1": "arg1", "arg2": 2, "arg3": "arg3"}
