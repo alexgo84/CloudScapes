@@ -1,2 +1,5 @@
+pgdata/
 logs/
 pkg/logger/logs/
+node_modules/
+package-lock.json

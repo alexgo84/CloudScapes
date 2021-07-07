@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+
+  database:
+    image: postgres:13
+    volumes:
+        - ./pgdata:/var/lib/postgresql/data
+    ports:
+        - "5432:5432"
+    environment:
+        - POSTGRES_USER=cloudscapes
+        - POSTGRES_PASSWORD=cloudscapes
+        - POSTGRES_DB=cloudscapes
+  

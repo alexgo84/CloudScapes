@@ -34,6 +34,13 @@ func Log(level LogLevel, msg string, fields ...zap.Field) {
 	}
 }
 
+func Flush() {
+	// since we log both to console and file we must sync. we ignore error
+	// as it will always complain since console is not syncable
+	// https://github.com/uber-go/zap/issues/880
+	zap.L().Sync()
+}
+
 // InitLogger will initialize a logger that logs messages both to console and to file
 // dev will determine the log level. If false, the log level is INFO, otherwise DEBUG.
 // if filename is provided it will be used for the name of the log file. otherwise,
