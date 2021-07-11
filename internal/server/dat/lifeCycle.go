@@ -47,6 +47,10 @@ func PingDB(ctx context.Context) error {
 	return err
 }
 
+func GetNewTransaction(ctx context.Context) (pgx.Tx, error) {
+	return dbMap.Begin(ctx)
+}
+
 func getEnv(key, defaultValue string) string {
 	if val := os.Getenv(key); val != "" {
 		return val

@@ -6,8 +6,6 @@ import (
 	"context"
 	"net/http"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 func Run() error {
@@ -27,23 +25,8 @@ func Run() error {
 
 func createServer() *http.Server {
 
-	rootRouter := mux.NewRouter()
-	rv1 := rootRouter.PathPrefix("/v1").Subrouter()
-
-	// respond to not allowed same as not found to increase security
-	notFoundHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-	})
-	rv1.NotFoundHandler = notFoundHandler
-	rv1.MethodNotAllowedHandler = notFoundHandler
-
-	// health check API
-	rv1.HandleFunc("/status/health",
-		healthCheckGetHandler).
-		Methods(http.MethodGet)
-
 	return &http.Server{
-		Handler:      rootRouter,
+		Handler:      createRouter(),
 		Addr:         "127.0.0.1:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
