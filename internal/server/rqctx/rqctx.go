@@ -36,7 +36,7 @@ func (ctx *Context) InitDBTransaction() error {
 		return err
 	}
 	ctx.txn = txn
-	ctx.DataContext = dat.NewDataContext(&txn)
+	ctx.DataContext = dat.NewDataContext(txn)
 	return nil
 }
 

@@ -53,7 +53,11 @@ func PingDB(ctx context.Context) error {
 }
 
 func GetNewTransaction(ctx context.Context) (pgx.Tx, error) {
-	return dbMap.Begin(ctx)
+	txn, err := dbMap.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return txn, nil
 }
 
 func RunMigrations(ctx context.Context) error {

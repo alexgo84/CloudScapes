@@ -5,6 +5,6 @@ type APIError struct {
 	Err        error
 }
 
-func (e *APIError) Error() string {
+func (e APIError) Error() string {
 	return e.Err.Error()
 }
