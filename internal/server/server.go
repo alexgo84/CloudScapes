@@ -18,6 +18,11 @@ func Run() error {
 		}
 	}()
 
+	l.Log(l.INFO, "initialized DB. now running all migrations")
+	if err := dat.RunMigrations(context.Background()); err != nil {
+		return err
+	}
+
 	s := createServer()
 	l.Log(l.INFO, "listening on port 8080")
 	return s.ListenAndServe()

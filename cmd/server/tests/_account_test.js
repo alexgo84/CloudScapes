@@ -6,7 +6,7 @@ const faker = require('faker')
 module.exports =
 {
     createAccount: function (suffix = '', params = {}) {
-        return this.post('/accounts')
+        return this.post('/v1/accounts')
             .send(
                 xtend(
                     {
@@ -17,7 +17,6 @@ module.exports =
                     params
                 )
             )
-            .expect(200)
             .store('session' + suffix, [])
     }
 }

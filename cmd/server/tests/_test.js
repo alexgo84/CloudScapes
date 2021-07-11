@@ -22,7 +22,7 @@ function Test(state) {
 // register requests execution methods
 ['put', 'post', 'get', 'delete'].forEach(function (method) {
   Test.prototype[method] = function (url) {
-    console.log("calling", method, url)
+    console.log(method, url)
 
     return new Request(method, url, this.state)
   }

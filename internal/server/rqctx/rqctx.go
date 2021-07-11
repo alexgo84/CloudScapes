@@ -3,7 +3,6 @@ package rqctx
 import (
 	"CloudScapes/internal/server/dat"
 	"CloudScapes/pkg/logger"
-	"context"
 	"encoding/json"
 	"net/http"
 
@@ -16,25 +15,28 @@ import (
 type Handler func(c *Context) ResponseHandler
 
 type Context struct {
-	ctx    context.Context
+	r      *http.Request
 	writer http.ResponseWriter
 	txn    pgx.Tx
 	uuid   uuid.UUID
+	dat.DataContext
 }
 
 func NewRequestContext(w http.ResponseWriter, r *http.Request) *Context {
 	return &Context{
-		ctx:  r.Context(),
-		uuid: uuid.New(),
+		r:      r,
+		uuid:   uuid.New(),
+		writer: w,
 	}
 }
 
 func (ctx *Context) InitDBTransaction() error {
-	txn, err := dat.GetNewTransaction(ctx.ctx)
+	txn, err := dat.GetNewTransaction(ctx.r.Context())
 	if err != nil {
 		return err
 	}
 	ctx.txn = txn
+	ctx.DataContext = dat.NewDataContext(&txn)
 	return nil
 }
 
@@ -64,7 +66,7 @@ func (ctx *Context) SendAPIError(err error) {
 }
 
 func (c *Context) MarshalAndWrite(payload interface{}, status int) []byte {
-	if payload == nil {
+	if payload == nil || status == http.StatusNoContent {
 		c.writer.WriteHeader(status)
 		return []byte{}
 	}
@@ -94,9 +96,9 @@ func (c *Context) MarshalAndWrite(payload interface{}, status int) []byte {
 }
 
 func (ctx *Context) Commit() error {
-	return ctx.txn.Commit(ctx.ctx)
+	return ctx.txn.Commit(ctx.r.Context())
 }
 
 func (ctx *Context) Rollback() error {
-	return ctx.txn.Rollback(ctx.ctx)
+	return ctx.txn.Rollback(ctx.r.Context())
 }
