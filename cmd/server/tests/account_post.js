@@ -7,7 +7,19 @@ addTest('create a new account', function (t) {
         .expect(201)
 })
 
-addTest('get an invalid account', function (t) {
-    return t.get('/v1/accounts/asdf')
-        .expect(400)
+addTest('get all accounts', function (t) {
+    return t.get('/v1/accounts')
+        .expect(200)
 })
+
+addTest('create a new user in same account', function (t) {
+    return t.post('/v1/users')
+        .send({
+            name: 'alex',
+            email: 'gordonsnif@gmail.com',
+            password: 'my-secure-password',
+            accountId: t.state.session.accountId,
+        })
+        .expect(201)
+})
+

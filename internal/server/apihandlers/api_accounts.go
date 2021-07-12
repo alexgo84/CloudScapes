@@ -4,7 +4,6 @@ import (
 	"CloudScapes/internal/server/rqctx"
 	"CloudScapes/pkg/wire"
 	"errors"
-	"fmt"
 	"os"
 )
 
@@ -40,9 +39,17 @@ func AccountsPostHandler(c *rqctx.Context) rqctx.ResponseHandler {
 		return c.SendError(err)
 	}
 
-	fmt.Println(account)
+	newUser := wire.NewUser{
+		Name:      req.Email,
+		Email:     req.Email,
+		AccountID: account.Id,
+		Password:  req.Password,
+	}
+	if _, err := c.Users.CreateUser(&newUser); err != nil {
+		return c.SendError(err)
+	}
 
-	return c.SendCreated(account)
+	return c.SendCreated(newUser)
 }
 
 func IsProduction() bool {

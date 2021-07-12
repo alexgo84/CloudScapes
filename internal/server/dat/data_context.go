@@ -8,10 +8,12 @@ import (
 
 type DataContext struct {
 	Accounts AccountsMapper
+	Users    UsersMapper
 }
 
 func NewDataContext(ctx context.Context, txn *sqlx.Tx) DataContext {
 	return DataContext{
 		Accounts: NewAccountsMapper(ctx, txn),
+		Users:    NewUsersMapper(ctx, txn),
 	}
 }

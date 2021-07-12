@@ -26,16 +26,11 @@ func NewAccountsMapper(ctx context.Context, txn *sqlx.Tx) AccountsMapper {
 }
 
 func (am *AccountsMapper) CreateAccount(companyName string) (*Account, error) {
-	_, err := am.txn.ExecContext(am.ctx, "INSERT INTO accounts (company_name) VALUES ($1)", companyName)
-	if err != nil {
+	acc := Account{CompanyName: companyName}
+	if err := namedGet(am.txn, "INSERT INTO accounts (company_name) VALUES (:company_name) RETURNING id, created_at", &acc); err != nil {
 		return nil, err
 	}
-
-	accounts, err := am.GetAccounts()
-	if err != nil {
-		return nil, err
-	}
-	return &accounts[0], nil
+	return &acc, nil
 }
 
 func (am *AccountsMapper) GetAccounts() ([]Account, error) {

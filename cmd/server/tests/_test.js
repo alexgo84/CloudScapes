@@ -23,7 +23,6 @@ function Test(state) {
 ['put', 'post', 'get', 'delete'].forEach(function (method) {
   Test.prototype[method] = function (url) {
     console.log(method, url)
-
     return new Request(method, url, this.state)
   }
 })
