@@ -1,6 +1,8 @@
 package wire
 
-type Plan struct {
+type NewPlan struct {
+	AccountID int64 `json:"accountId" db:"accountid"`
+
 	Name      string `json:"name" db:"name"`
 	Replicas  int64  `json:"replicas" db:"replicas"`
 	ClusterID int64  `json:"clusterID" db:"clusterid"`

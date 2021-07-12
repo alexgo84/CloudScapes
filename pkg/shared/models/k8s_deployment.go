@@ -110,8 +110,8 @@ func NewK8sDeployment(deploy wire.Deployment, plan dat.Plan) *K8sDeployment {
 
 	cronJobs := []wire.CronJob{}
 cronJobLoop:
-	for i, _ := range plan.CronJobs {
-		for j, _ := range k8sDeploy.CronJobs {
+	for i := range plan.CronJobs {
+		for j := range k8sDeploy.CronJobs {
 			if plan.CronJobs[i].Name == k8sDeploy.CronJobs[j].Name {
 				cronJobs = append(cronJobs, k8sDeploy.CronJobs[j])
 				continue cronJobLoop
@@ -124,8 +124,8 @@ cronJobLoop:
 
 	configMaps := []wire.ConfigMap{}
 configMapLoop:
-	for i, _ := range plan.ConfigMaps {
-		for j, _ := range k8sDeploy.ConfigMaps {
+	for i := range plan.ConfigMaps {
+		for j := range k8sDeploy.ConfigMaps {
 			if plan.ConfigMaps[i].Name == k8sDeploy.ConfigMaps[j].Name {
 				configMaps = append(configMaps, k8sDeploy.ConfigMaps[j])
 				continue configMapLoop
