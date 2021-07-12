@@ -15,6 +15,6 @@ type Plan struct {
 	DatabaseServicePlan  string `json:"databaseServicePlan" db:"database_service_plan"`
 
 	EnvVars    map[string]interface{} `json:"envVars" db:"env_vars"`
-	CronJobs   interface{}            `json:"cronJobs" db:"cron_jobs"`
-	ConfigMaps interface{}            `json:"configMaps" db:"config_maps"`
+	CronJobs   []CronJob              `json:"cronJobs" db:"cron_jobs"`
+	ConfigMaps []ConfigMap            `json:"configMaps" db:"config_maps"`
 }
