@@ -1,6 +1,9 @@
 package shared
 
-import "CloudScapes/pkg/wire"
+import (
+	"CloudScapes/internal/server/dat"
+	"CloudScapes/pkg/wire"
+)
 
 // K8sDeployment is a wire.Deployment compiled with the plan that it held a reference to in planid.
 // This means that any null field value in wire.Deployment was replaced with the corresponding value
@@ -57,4 +60,81 @@ type K8sDeployment struct {
 	// of the refernced plan. When both plan and deployment declare the same ConfigMap name, only the one
 	// from the deployment will be used.
 	ConfigMaps []wire.ConfigMap `json:"configMaps"`
+}
+
+func NewK8sDeployment(deploy wire.Deployment, plan dat.Plan) *K8sDeployment {
+	k8sDeploy := K8sDeployment{
+		Name:     deploy.Name,
+		Replicas: plan.Replicas,
+		CPULimit: plan.CPULimit,
+		MemLimit: plan.MemLimit,
+		CPUReq:   plan.CPUReq,
+		MemReq:   plan.MemReq,
+
+		DatabaseServiceName:  plan.DatabaseServiceName,
+		DatabaseServiceCloud: plan.DatabaseServiceCloud,
+		DatabaseServicePlan:  plan.DatabaseServicePlan,
+
+		EnvVars: plan.EnvVars,
+	}
+
+	if deploy.Replicas != nil {
+		k8sDeploy.Replicas = *deploy.Replicas
+	}
+	if deploy.CPULimit != nil {
+		k8sDeploy.CPULimit = *deploy.CPULimit
+	}
+	if deploy.MemLimit != nil {
+		k8sDeploy.MemLimit = *deploy.MemLimit
+	}
+	if deploy.CPUReq != nil {
+		k8sDeploy.CPUReq = *deploy.CPUReq
+	}
+	if deploy.MemReq != nil {
+		k8sDeploy.MemReq = *deploy.MemReq
+	}
+	if deploy.DatabaseServiceName != nil {
+		k8sDeploy.DatabaseServiceName = *deploy.DatabaseServiceName
+	}
+	if deploy.DatabaseServiceCloud != nil {
+		k8sDeploy.DatabaseServiceCloud = *deploy.DatabaseServiceCloud
+	}
+	if deploy.DatabaseServicePlan != nil {
+		k8sDeploy.DatabaseServicePlan = *deploy.DatabaseServicePlan
+	}
+
+	// override environement variables
+	for k, v := range deploy.EnvVars {
+		k8sDeploy.EnvVars[k] = v
+	}
+
+	cronJobs := []wire.CronJob{}
+cronJobLoop:
+	for i, _ := range plan.CronJobs {
+		for j, _ := range k8sDeploy.CronJobs {
+			if plan.CronJobs[i].Name == k8sDeploy.CronJobs[j].Name {
+				cronJobs = append(cronJobs, k8sDeploy.CronJobs[j])
+				continue cronJobLoop
+			}
+		}
+		// if an override was not found
+		cronJobs = append(cronJobs, plan.CronJobs[i])
+	}
+	k8sDeploy.CronJobs = cronJobs
+
+	configMaps := []wire.ConfigMap{}
+configMapLoop:
+	for i, _ := range plan.ConfigMaps {
+		for j, _ := range k8sDeploy.ConfigMaps {
+			if plan.ConfigMaps[i].Name == k8sDeploy.ConfigMaps[j].Name {
+				configMaps = append(configMaps, k8sDeploy.ConfigMaps[j])
+				continue configMapLoop
+			}
+		}
+		// if an override was not found
+		configMaps = append(configMaps, plan.ConfigMaps[i])
+	}
+	k8sDeploy.ConfigMaps = configMaps
+
+	return &k8sDeploy
 }
