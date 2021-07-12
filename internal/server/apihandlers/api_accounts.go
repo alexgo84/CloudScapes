@@ -42,7 +42,7 @@ func AccountsPostHandler(c *rqctx.Context) rqctx.ResponseHandler {
 	newUser := wire.NewUser{
 		Name:      req.Email,
 		Email:     req.Email,
-		AccountID: account.Id,
+		AccountID: account.ID,
 		Password:  req.Password,
 	}
 	if _, err := c.Users.CreateUser(&newUser); err != nil {

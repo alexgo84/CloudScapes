@@ -13,7 +13,7 @@ type AccountsMapper struct {
 }
 
 type Account struct {
-	Id          int64     `json:"id" db:"id"`
+	ID          int64     `json:"id" db:"id"`
 	Created     time.Time `json:"created" db:"created_at"`
 	CompanyName string    `json:"companyName" db:"company_name"`
 }
@@ -40,4 +40,15 @@ func (am *AccountsMapper) GetAccounts() ([]Account, error) {
 		return nil, err
 	}
 	return accounts, nil
+}
+
+//GetLastAccount is a convenience method to provide account isolation before authentication
+// is implemented by alwasy putting the latest account on context
+func (am *AccountsMapper) GetLastAccount() (*Account, error) {
+	var accounts []Account
+	err := am.txn.SelectContext(am.ctx, &accounts, "select * from accounts ORDER BY id desc LIMIT 1")
+	if err != nil {
+		return nil, err
+	}
+	return &accounts[0], nil
 }

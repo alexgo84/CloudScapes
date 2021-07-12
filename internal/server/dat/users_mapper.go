@@ -49,9 +49,9 @@ func (am *UsersMapper) CreateUser(newUser *wire.NewUser) (*User, error) {
 	return &u, nil
 }
 
-func (am *UsersMapper) GetAllUsers() ([]User, error) {
+func (am *UsersMapper) GetUsers(accountID int64) ([]User, error) {
 	var users []User
-	err := am.txn.SelectContext(am.ctx, &users, "select * from users")
+	err := am.txn.SelectContext(am.ctx, &users, "select * from users WHERE accountid = $1 ORDER BY id desc", accountID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return []User{}, nil
 	}

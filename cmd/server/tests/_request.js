@@ -59,14 +59,14 @@ Request.prototype.store = function (destKey, srcKey) {
     })
 }
 
-Request.prototype.expectLen = function (length, path) {
+Request.prototype.expectLen = function (path, length) {
     this.expect(function counter(res) {
         var toCheck
-        checkEntireBody = key == null
+        const checkEntireBody = path == null
         if (checkEntireBody) {
             toCheck = res.body
         } else {
-            toCheck = dottie.get(res.body, key)
+            toCheck = dottie.get(res.body, path)
             if (toCheck === undefined) {
                 throw new Error(`expectLen: path '${path}' not found in response: \n${res.body}`)
             }
@@ -78,20 +78,20 @@ Request.prototype.expectLen = function (length, path) {
     return this
 }
 
-Request.prototype.expectField = function (value, path) {
+Request.prototype.expectField = function (path, value) {
     this.expect(function counter(res) {
         var toCheck
-        checkEntireBody = key == null
+        const checkEntireBody = path == null
         if (checkEntireBody) {
             toCheck = res.body
         } else {
-            toCheck = dottie.get(res.body, key)
+            toCheck = dottie.get(res.body, path)
             if (toCheck === undefined) {
-                throw new Error(`expectLen: path '${path}' not found in response: \n${res.body}`)
+                throw new Error(`expectField: path '${path}' not found in response: \n${res.body}`)
             }
         }
-        if (toCheck === value) {
-            throw new Error(`unexpected value at path '${path}' - expected ${value} but found ${toCheck}`)
+        if (toCheck !== value) {
+            throw new Error(`unexpected value at path '${path}' -\nexpected:\n\t${value}\nbut found:\n\t${toCheck}`)
         }
     })
     return this
