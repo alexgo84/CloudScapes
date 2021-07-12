@@ -118,6 +118,8 @@ func (db *DB) RunMigrations(ctx context.Context) error {
 
 		allMigrations += decoratedMigration
 	}
+	//fmt.Println(allMigrations)
+
 	_, err = db.dbMap.ExecContext(ctx, allMigrations)
 	return err
 }
