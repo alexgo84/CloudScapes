@@ -5,6 +5,7 @@ import (
 	"CloudScapes/pkg/wire"
 	"errors"
 	"fmt"
+	"os"
 )
 
 func AccountsGetHandler(c *rqctx.Context) rqctx.ResponseHandler {
@@ -21,10 +22,10 @@ func AccountsPostHandler(c *rqctx.Context) rqctx.ResponseHandler {
 		return c.SendError(err)
 	}
 
-	if len(accounts) >= 1 {
+	if IsProduction() && len(accounts) >= 1 {
 		multipleAccountsError := wire.APIError{
 			StatusCode: 400,
-			Err:        errors.New("only one account may be created"),
+			Err:        errors.New("only one account may be created in a production environment"),
 		}
 		return c.SendError(multipleAccountsError)
 	}
@@ -42,4 +43,8 @@ func AccountsPostHandler(c *rqctx.Context) rqctx.ResponseHandler {
 	fmt.Println(account)
 
 	return c.SendCreated(account)
+}
+
+func IsProduction() bool {
+	return os.Getenv("RELEASE_STAGE") == "production"
 }

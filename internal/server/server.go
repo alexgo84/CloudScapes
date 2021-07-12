@@ -2,10 +2,15 @@ package server
 
 import (
 	"CloudScapes/internal/server/dat"
+	"CloudScapes/internal/server/rqctx"
 	l "CloudScapes/pkg/logger"
 	"context"
+	"fmt"
 	"net/http"
+	"runtime/debug"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 func Run() error {
@@ -34,4 +39,25 @@ func Run() error {
 	}
 	l.Log(l.INFO, "serving requests on port 8080")
 	return s.ListenAndServe()
+}
+
+func handlePanicRecovery(ctx *rqctx.Context) {
+	if err := recover(); err != nil {
+
+		// report error
+		e, ok := err.(error)
+		if !ok {
+			e = fmt.Errorf("%#v\n%s", err, string(debug.Stack()))
+		}
+		ctx.ReportError("Recovered handler panic", zap.Error(e))
+
+		// print stack
+		l.Log(l.INFO, string(debug.Stack()))
+
+		// rollback transaction
+		rErr := ctx.Rollback()
+		if err != nil {
+			l.Log(l.ERROR, "failed to rollback error", zap.Error(rErr))
+		}
+	}
 }
