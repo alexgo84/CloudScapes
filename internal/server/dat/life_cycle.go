@@ -3,7 +3,6 @@ package dat
 import (
 	"CloudScapes/pkg/logger"
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,14 +10,16 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 
-	"github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/jmoiron/sqlx"
 )
 
-var dbMap *pgx.Conn
+type DB struct {
+	dbMap *sqlx.DB
+}
 
-func InitDB(ctx context.Context) error {
+func NewDB(ctx context.Context) (*DB, error) {
 	user := getEnv("POSTGRES_USER", "cloudscapes")
 	pass := getEnv("POSTGRES_DB", "cloudscapes")
 	host := getEnv("POSTGRES_HOST", "localhost")
@@ -28,45 +29,40 @@ func InitDB(ctx context.Context) error {
 	connectionURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, pass, host, port, dbName)
 
 	var err error
-	dbMap, err = pgx.Connect(ctx, connectionURL)
+	dbMap, err := sqlx.ConnectContext(ctx, "pgx", connectionURL)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		return err
+		return nil, err
 	}
 	logger.Log(logger.INFO, fmt.Sprintf("Connected user '%s' to DB '%s' @ %s:%s", user, dbName, host, port))
 
-	return nil
+	return &DB{dbMap: dbMap}, nil
 }
 
-func CloseDB(ctx context.Context) error {
-	return dbMap.Close(ctx)
-}
-
-func PingDB(ctx context.Context) error {
-	if dbMap == nil {
-		return errors.New("db not initialized")
-	}
-	contextWithTimeout, c := context.WithTimeout(ctx, time.Second*5)
-	err := dbMap.Ping(contextWithTimeout)
-	c()
+func (db *DB) PingDB(ctx context.Context) error {
+	err := db.dbMap.PingContext(ctx)
 	return err
 }
 
-func GetNewTransaction(ctx context.Context) (pgx.Tx, error) {
-	txn, err := dbMap.Begin(ctx)
+func (db *DB) Close() error {
+	err := db.dbMap.Close()
+	return err
+}
+
+func (db *DB) GetNewTransaction(ctx context.Context) (*sqlx.Tx, error) {
+	txn, err := db.dbMap.BeginTxx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 	return txn, nil
 }
 
-func RunMigrations(ctx context.Context) error {
+func (db *DB) RunMigrations(ctx context.Context) error {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	migrationsDirectory := cwd + "/internal/server/dat/migrations"
+	migrationsDirectory := cwd + "/../../internal/server/dat/migrations"
 	files, err := ioutil.ReadDir(migrationsDirectory)
 	if err != nil {
 		return err
@@ -122,8 +118,7 @@ func RunMigrations(ctx context.Context) error {
 
 		allMigrations += decoratedMigration
 	}
-
-	_, err = dbMap.Exec(ctx, allMigrations)
+	_, err = db.dbMap.ExecContext(ctx, allMigrations)
 	return err
 }
 

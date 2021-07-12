@@ -1,6 +1,8 @@
 package server
 
 import (
+	"CloudScapes/internal/server/apihandlers"
+	"CloudScapes/internal/server/dat"
 	"CloudScapes/internal/server/rqctx"
 	"CloudScapes/pkg/logger"
 	"fmt"
@@ -11,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func createRouter() *mux.Router {
+func createRouter(db *dat.DB) *mux.Router {
 	rootRouter := mux.NewRouter()
 	rv1 := rootRouter.PathPrefix("/v1").Subrouter()
 
@@ -22,29 +24,29 @@ func createRouter() *mux.Router {
 	rv1.NotFoundHandler = notFoundHandler
 	rv1.MethodNotAllowedHandler = notFoundHandler
 
-	// health check API
+	// health check API (implement inline for simplicity since it doesnt use contextify)
 	rv1.HandleFunc("/status/health",
-		healthCheckGetHandler).
+		apihandlers.HealthCheckGetHandler(db)).
 		Methods(http.MethodGet)
 
 	// Accounts API
 	rv1.HandleFunc("/accounts",
-		contextify(authSession(accountsGetHandler))).
+		contextify(db, authSession(apihandlers.AccountsGetHandler))).
 		Methods(http.MethodGet)
 
 	rv1.HandleFunc("/accounts",
-		contextify(accountsPostHandler)).
+		contextify(db, apihandlers.AccountsPostHandler)).
 		Methods(http.MethodPost)
 
 	return rootRouter
 }
 
-func contextify(h rqctx.Handler) func(w http.ResponseWriter, r *http.Request) {
+func contextify(db *dat.DB, h rqctx.Handler) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		ctx := rqctx.NewRequestContext(w, r)
 
-		ctx.InitDBTransaction()
+		ctx.InitDBContext(db)
 
 		defer func() {
 			handlePanicRecovery(ctx)
@@ -53,11 +55,19 @@ func contextify(h rqctx.Handler) func(w http.ResponseWriter, r *http.Request) {
 		res := h(ctx)
 
 		switch {
-		case res.StatusCode == http.StatusNoContent:
-			ctx.MarshalAndWrite([]byte{}, res.StatusCode)
 		case res.StatusCode >= 400:
+			logger.Log(logger.INFO, "write ERROR response", logger.Str("method", r.Method), logger.Str("URL", r.URL.String()), logger.Int64("status", int64(res.StatusCode)))
+			if err := ctx.Rollback(); err != nil {
+				logger.Log(logger.ERROR, "commit failed", zap.Error(err))
+			}
 			ctx.MarshalAndWrite([]byte(res.Err.Error()), res.StatusCode)
+
 		default:
+			logger.Log(logger.INFO, "write response", logger.Str("method", r.Method), logger.Str("URL", r.URL.String()), logger.Int64("status", int64(res.StatusCode)))
+			if err := ctx.Commit(); err != nil {
+				logger.Log(logger.ERROR, "commit failed", zap.Error(err))
+				return
+			}
 			ctx.MarshalAndWrite(res.Obj, res.StatusCode)
 		}
 	}

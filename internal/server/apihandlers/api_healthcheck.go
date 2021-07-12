@@ -1,4 +1,4 @@
-package server
+package apihandlers
 
 import (
 	"CloudScapes/internal/server/dat"
@@ -7,12 +7,13 @@ import (
 	"net/http"
 )
 
-func healthCheckGetHandler(w http.ResponseWriter, r *http.Request) {
-	if err := dat.PingDB(context.Background()); err != nil {
-		respond(w, http.StatusInternalServerError, []byte(err.Error()))
+func HealthCheckGetHandler(db *dat.DB) func(http.ResponseWriter, *http.Request) {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		if err := db.PingDB(context.Background()); err != nil {
+			respond(rw, http.StatusInternalServerError, []byte(err.Error()))
+		}
+		respond(rw, http.StatusOK, nil)
 	}
-	respond(w, http.StatusOK, nil)
-
 }
 
 func respond(w http.ResponseWriter, status int64, payload []byte) {

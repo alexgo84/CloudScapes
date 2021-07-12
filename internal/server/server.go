@@ -9,31 +9,29 @@ import (
 )
 
 func Run() error {
-	if err := dat.InitDB(context.Background()); err != nil {
+	l.Log(l.INFO, "initializing database")
+
+	db, err := dat.NewDB(context.Background())
+	if err != nil {
 		return err
 	}
 	defer func() {
-		if err := dat.CloseDB(context.Background()); err != nil {
+		if err := db.Close(); err != nil {
 			l.Log(l.ERROR, "database close failed", l.Err(err))
 		}
 	}()
 
-	l.Log(l.INFO, "initialized DB. now running all migrations")
-	if err := dat.RunMigrations(context.Background()); err != nil {
+	l.Log(l.INFO, "running all database migrations")
+	if err := db.RunMigrations(context.Background()); err != nil {
 		return err
 	}
 
-	s := createServer()
-	l.Log(l.INFO, "listening on port 8080")
-	return s.ListenAndServe()
-}
-
-func createServer() *http.Server {
-
-	return &http.Server{
-		Handler:      createRouter(),
+	s := &http.Server{
+		Handler:      createRouter(db),
 		Addr:         "127.0.0.1:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
+	l.Log(l.INFO, "serving requests on port 8080")
+	return s.ListenAndServe()
 }

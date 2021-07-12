@@ -22,6 +22,14 @@ func (c *Context) SendOK(obj interface{}) ResponseHandler {
 	}
 }
 
+func (c *Context) SendCreated(obj interface{}) ResponseHandler {
+	return ResponseHandler{
+		StatusCode: http.StatusCreated,
+		Obj:        obj,
+		Err:        nil,
+	}
+}
+
 func (c *Context) SendNothing() ResponseHandler {
 	return ResponseHandler{
 		StatusCode: http.StatusNoContent,
@@ -32,7 +40,7 @@ func (c *Context) SendNothing() ResponseHandler {
 
 func (c *Context) SendError(err error) ResponseHandler {
 	var rv ResponseHandler
-	var apiErr *wire.APIError
+	var apiErr wire.APIError
 	if ok := errors.As(err, &apiErr); ok {
 		rv = ResponseHandler{
 			StatusCode: apiErr.StatusCode,

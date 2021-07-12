@@ -1,13 +1,17 @@
 package dat
 
-import "github.com/jackc/pgx/v4"
+import (
+	"context"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type DataContext struct {
 	Accounts AccountsMapper
 }
 
-func NewDataContext(txn pgx.Tx) DataContext {
+func NewDataContext(ctx context.Context, txn *sqlx.Tx) DataContext {
 	return DataContext{
-		Accounts: NewAccountsMapper(txn),
+		Accounts: NewAccountsMapper(ctx, txn),
 	}
 }

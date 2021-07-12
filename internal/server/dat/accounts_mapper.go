@@ -1,43 +1,48 @@
 package dat
 
 import (
-	"fmt"
+	"context"
 	"time"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jmoiron/sqlx"
 )
 
 type AccountsMapper struct {
-	txn pgx.Tx
+	txn *sqlx.Tx
+	ctx context.Context
 }
 
 type Account struct {
-	Id      int64     `json:"id" db:"id"`
-	Created time.Time `json:"created" db:"created_at"`
+	Id          int64     `json:"id" db:"id"`
+	Created     time.Time `json:"created" db:"created_at"`
+	CompanyName string    `json:"companyName" db:"company_name"`
 }
 
-func NewAccountsMapper(txn pgx.Tx) AccountsMapper {
+func NewAccountsMapper(ctx context.Context, txn *sqlx.Tx) AccountsMapper {
 	return AccountsMapper{
 		txn: txn,
+		ctx: ctx,
 	}
 }
 
-func (am *AccountsMapper) CreateAccount() (*Account, error) {
-	return nil, nil
+func (am *AccountsMapper) CreateAccount(companyName string) (*Account, error) {
+	_, err := am.txn.ExecContext(am.ctx, "INSERT INTO accounts (company_name) VALUES ($1)", companyName)
+	if err != nil {
+		return nil, err
+	}
+
+	accounts, err := am.GetAccounts()
+	if err != nil {
+		return nil, err
+	}
+	return &accounts[0], nil
 }
 
 func (am *AccountsMapper) GetAccounts() ([]Account, error) {
-	fmt.Printf("am.txn: %v\n", am.txn)
-
-	// rows, err := am.txn.Query(context.Background(), "select * from accounts")
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// var acc []Account
-	// rows.Next()
-	// if err := rows.Scan(&acc); err != nil {
-	// 	return nil, err
-	// }
-	return nil, nil
+	var accounts []Account
+	err := am.txn.SelectContext(am.ctx, &accounts, "select * from accounts")
+	if err != nil {
+		return nil, err
+	}
+	return accounts, nil
 }
