@@ -29,7 +29,7 @@ func AccountsPostHandler(c *rqctx.Context) rqctx.ResponseHandler {
 		return c.SendError(multipleAccountsError)
 	}
 
-	var req wire.PostAccountRequest
+	var req wire.CreateAccountRequest
 	if err := c.DecodeBody(&req); err != nil {
 		return c.SendError(err)
 	}

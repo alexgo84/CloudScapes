@@ -21,6 +21,6 @@ type Deployment struct {
 	DatabaseServicePlan  *string `json:"databaseServicePlan" db:"database_service_plan"`
 
 	EnvVars    map[string]interface{} `json:"envVars" db:"env_vars"`
-	CronJobs   interface{}            `json:"cronJobs" db:"cron_jobs"`
+	CronJobs   []CronJob              `json:"cronJobs" db:"cron_jobs"`
 	ConfigMaps []ConfigMap            `json:"configMaps" db:"config_maps"`
 }
