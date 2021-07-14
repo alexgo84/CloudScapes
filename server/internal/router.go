@@ -55,5 +55,22 @@ func createRouter(db *dat.DB) *mux.Router {
 		contextify(db, apihandlers.ClustersDeleteHandler)).
 		Methods(http.MethodDelete)
 
+	// Plans API
+	rv1.HandleFunc("/plans",
+		contextify(db, apihandlers.PlansPostHandler)).
+		Methods(http.MethodPost)
+
+	rv1.HandleFunc("/plans",
+		contextify(db, apihandlers.PlansGetHandler)).
+		Methods(http.MethodGet)
+
+	rv1.HandleFunc("/plans/{planId}",
+		contextify(db, apihandlers.PlansPutHandler)).
+		Methods(http.MethodPut)
+
+	rv1.HandleFunc("/plans/{planId}",
+		contextify(db, apihandlers.PlansDeleteHandler)).
+		Methods(http.MethodDelete)
+
 	return rootRouter
 }
