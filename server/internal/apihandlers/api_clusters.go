@@ -3,12 +3,10 @@ package apihandlers
 import (
 	"CloudScapes/pkg/wire"
 	"CloudScapes/server/internal/rqctx"
-	"fmt"
 )
 
 func ClustersGetHandler(c *rqctx.Context) rqctx.ResponseHandler {
 	clusters, err := c.Clusters.GetClusters(c.Account.ID)
-	fmt.Println(clusters, clusters == nil, len(clusters))
 	if err != nil {
 		return c.SendError(err)
 	}

@@ -6,5 +6,6 @@ CREATE TABLE IF NOT EXISTS users(
     accountid bigint NOT NULL,
     CONSTRAINT fk_users_accountid
         FOREIGN KEY(accountid)
-	        REFERENCES accounts(id)
+	        REFERENCES accounts(id),
+    UNIQUE (accountid, name)
 );

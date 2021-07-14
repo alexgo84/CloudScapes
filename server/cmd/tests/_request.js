@@ -71,7 +71,7 @@ Request.prototype.expectLen = function (path, length) {
                 throw new Error(`expectLen: path '${path}' not found in response: \n${res.body}`)
             }
         }
-        if (toCheck.length != n) {
+        if (toCheck.length != length) {
             throw new Error(`unexpected length at path '${path}' - expected ${length} but found ${toCheck.length}`)
         }
     })

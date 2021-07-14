@@ -3,7 +3,6 @@ package rqctx
 import (
 	"CloudScapes/pkg/logger"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -34,13 +33,11 @@ func (ctx *Context) SendAPIError(err error) {
 }
 
 func (c *Context) MarshalAndWrite(payload interface{}, status int) []byte {
-	fmt.Println("payload", payload)
 	if payload == nil || status == http.StatusNoContent {
 		c.writer.WriteHeader(status)
 		return []byte{}
 	}
 	marshaled, err := json.Marshal(payload)
-	fmt.Println("writing payload", payload, string(marshaled))
 
 	if err != nil {
 		c.writer.WriteHeader(http.StatusInternalServerError)

@@ -40,6 +40,12 @@ func (ctx *Context) InitDBContext(db *dat.DB) error {
 	if err != nil {
 		return err
 	}
+
+	// if there is no account - return
+	if acc == nil {
+		return nil
+	}
+
 	ctx.Account = *acc
 
 	users, err := ctx.Users.GetUsers(acc.ID)

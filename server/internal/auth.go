@@ -34,7 +34,7 @@ func contextify(db *dat.DB, h rqctx.Handler) func(w http.ResponseWriter, r *http
 			if err := ctx.Rollback(); err != nil {
 				ctx.ReportError("rollback failed", zap.Error(err))
 			}
-			ctx.MarshalAndWrite([]byte(res.Err.Error()), res.StatusCode)
+			ctx.MarshalAndWrite(res.Err.Error(), res.StatusCode)
 			return
 
 		default:

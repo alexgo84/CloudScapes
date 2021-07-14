@@ -1,5 +1,6 @@
 pgdata/
 logs/
+pkg/debug/
 pkg/logger/logs/
 node_modules/
 package-lock.json
