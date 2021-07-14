@@ -46,10 +46,10 @@ func (am *PlansMapper) CreatePlan(newPlan wire.NewPlan) (*Plan, error) {
 func (am *PlansMapper) UpdatePlan(planID int64, newPlan wire.NewPlan) (*Plan, error) {
 	p := Plan{NewPlan: newPlan}
 	p.ID = planID
-	err := namedGet(am.txn, `UPDATE plans SET 
+	err := namedGet(am.txn, `UPDATE plans SET  -- TODO: make it update for real
 	name=:name, replicas=:replicas -- replicas, clusterid, cpu_limit, mem_limit, cpu_req, mem_req, database_service_name, database_service_cloud, database_service_plan, env_vars, cron_jobs, config_maps) 
 	WHERE id = :id
-	RETURNING id, created_at, accountid`, &p)
+	RETURNING id, created_at, accountid, modified_at`, &p)
 	if err != nil {
 		return nil, err
 	}

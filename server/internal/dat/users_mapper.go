@@ -18,7 +18,7 @@ type UsersMapper struct {
 }
 
 type User struct {
-	Id           int64     `json:"id" db:"id"`
+	ID           int64     `json:"id" db:"id"`
 	Created      time.Time `json:"created" db:"created_at"`
 	AccountID    int64     `json:"accountId" db:"accountid"`
 	PasswordHash string    `json:"-" db:"password_hash"`

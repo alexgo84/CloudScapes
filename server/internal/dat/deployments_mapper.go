@@ -39,22 +39,43 @@ func NewDeploymentsMapper(ctx context.Context, txn *sqlx.Tx, accountID int64) De
 		accountID: accountID,
 	}
 }
-
-func (am *DeploymentsMapper) CreateDeployment(newDeployment wire.NewDeployment, userID int64, sfState *string) (*Deployment, error) {
-	d := Deployment{NewDeployment: newDeployment, CreatedBy: userID, SalesforceState: sfState, AccountID: am.accountID}
+func (am *DeploymentsMapper) CreateDeployment(newDeployment wire.NewDeployment, userID int64) (*Deployment, error) {
+	d := Deployment{
+		NewDeployment: newDeployment,
+		AccountID:     am.accountID,
+		CreatedBy:     userID,
+	}
 	err := namedGet(am.txn, `INSERT INTO deployments 
-	(accountid, name, replicas, clusterid, cpu_limit, mem_limit, cpu_req, mem_req, database_service_name, database_service_cloud, database_service_plan, env_vars, cron_jobs, config_maps, salesforce_state) 
+	(accountid, name, replicas, clusterid, cpu_limit, mem_limit, cpu_req, mem_req, database_service_name, database_service_cloud, database_service_deployment, env_vars, cron_jobs, config_maps, image_path, image_sha, exclude_from_updates, planid, salesforce_state) 
 	VALUES 
-	(:accountid, :name, :replicas, :clusterid, :cpu_limit, :mem_limit, :cpu_req, :mem_req, :database_service_name, :database_service_cloud, :database_service_plan, :env_vars, :cron_jobs, :config_maps, :salesforce_state) RETURNING id, created_at`, &d)
+	(:accountid, :name, :replicas, :clusterid, :cpu_limit, :mem_limit, :cpu_req, :mem_req, :database_service_name, :database_service_cloud, :database_service_deployment, :env_vars, :cron_jobs, :config_maps, :image_path, :image_sha, :exclude_from_updates, :planid, :salesforce_state) 
+	RETURNING id, created_at, accountid`, &d)
 	if err != nil {
 		return nil, err
 	}
 	return &d, nil
 }
 
-func (am *DeploymentsMapper) GetDeployment() ([]Deployment, error) {
+func (am *DeploymentsMapper) UpdateDeployment(deploymentID, userID int64, newDeployment wire.NewDeployment) (*Deployment, error) {
+	d := Deployment{
+		NewDeployment: newDeployment,
+		AccountID:     am.accountID,
+		ModifiedBy:    &userID,
+		ID:            deploymentID,
+	}
+	err := namedGet(am.txn, `UPDATE deployments SET  -- TODO: make it update for real
+	name=:name, replicas=:replicas -- accountid, name, replicas, clusterid, cpu_limit, mem_limit, cpu_req, mem_req, database_service_name, database_service_cloud, database_service_deployment, env_vars, cron_jobs, config_maps, image_path, image_sha, exclude_from_updates, planid, salesforce_state
+	WHERE id = :id
+	RETURNING id, created_at, modified_at, accountid`, &d)
+	if err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func (am *DeploymentsMapper) GetDeployments() ([]Deployment, error) {
 	deployments := []Deployment{} // assign to empty array so that no result case does not return null
-	err := am.txn.SelectContext(am.ctx, &deployments, "select * from plans WHERE accountid = $1 ORDER BY id desc", am.accountID)
+	err := am.txn.SelectContext(am.ctx, &deployments, "SELECT * FROM deployments WHERE accountid = $1 ORDER BY id desc", am.accountID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return []Deployment{}, nil
 	}
@@ -62,4 +83,24 @@ func (am *DeploymentsMapper) GetDeployment() ([]Deployment, error) {
 		return nil, err
 	}
 	return deployments, nil
+}
+
+func (am *DeploymentsMapper) GetDeployment(deploymentID int64) (*Deployment, error) {
+	var deployment Deployment
+	err := am.txn.GetContext(am.ctx, &deployment, "SELECT * FROM deployments WHERE accountid = $1 AND id = $2", am.accountID, deploymentID)
+	if err != nil {
+		return nil, err
+	}
+	return &deployment, nil
+}
+
+func (am *DeploymentsMapper) DeleteDeployment(deploymentID int64) error {
+	if _, err := am.GetDeployment(deploymentID); err != nil {
+		return err
+	}
+	_, err := am.txn.QueryContext(am.ctx, "DELETE FROM deployments WHERE accountid = $1 AND id = $2", am.accountID, deploymentID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

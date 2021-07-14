@@ -72,5 +72,22 @@ func createRouter(db *dat.DB) *mux.Router {
 		contextify(db, apihandlers.PlansDeleteHandler)).
 		Methods(http.MethodDelete)
 
+	// Deployments API
+	rv1.HandleFunc("/deployments",
+		contextify(db, apihandlers.DeploymentsPostHandler)).
+		Methods(http.MethodPost)
+
+	rv1.HandleFunc("/deployments",
+		contextify(db, apihandlers.DeploymentsGetHandler)).
+		Methods(http.MethodGet)
+
+	rv1.HandleFunc("/deployments/{deploymentId}",
+		contextify(db, apihandlers.DeploymentsPutHandler)).
+		Methods(http.MethodPut)
+
+	rv1.HandleFunc("/deployments/{deploymentId}",
+		contextify(db, apihandlers.DeploymentsDeleteHandler)).
+		Methods(http.MethodDelete)
+
 	return rootRouter
 }
