@@ -60,7 +60,7 @@ func DeploymentsDeleteHandler(c *rqctx.Context) rqctx.ResponseHandler {
 		return c.SendError(err)
 	}
 
-	if err := c.Deployments.DeleteDeployment(DeploymentID); err != nil {
+	if err := c.Deployments.DeleteDeployment(DeploymentID, c.User.ID); err != nil {
 		return c.SendError(convetErrIfNeeded("Deployment", DeploymentID, err))
 	}
 	return c.SendNothing()

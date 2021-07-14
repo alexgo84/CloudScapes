@@ -22,10 +22,12 @@ type Deployment struct {
 	Created   time.Time `json:"created" db:"created_at"`
 	CreatedBy int64     `json:"createdBy" db:"created_by"`
 
-	Modified   *time.Time `json:"modified" db:"modfied_at"`
+	Modified   *time.Time `json:"modified" db:"modified_at"`
 	ModifiedBy *int64     `json:"modifiedBy" db:"modified_by"`
 	Deleted    *time.Time `json:"deleted" db:"deleted_at"`
 	DeletedBy  *int64     `json:"deletedBy" db:"deleted_by"`
+
+	ExcludeFromUpdates bool `json:"excludeFromUpdates" db:"exlude_from_updates"`
 
 	SalesforceState *string `json:"salesforceState" db:"salesforce_state"`
 
@@ -75,7 +77,7 @@ func (am *DeploymentsMapper) UpdateDeployment(deploymentID, userID int64, newDep
 
 func (am *DeploymentsMapper) GetDeployments() ([]Deployment, error) {
 	deployments := []Deployment{} // assign to empty array so that no result case does not return null
-	err := am.txn.SelectContext(am.ctx, &deployments, "SELECT * FROM deployments WHERE accountid = $1 ORDER BY id desc", am.accountID)
+	err := am.txn.SelectContext(am.ctx, &deployments, "SELECT * FROM deployments WHERE accountid = $1 AND deleted_at IS NULL ORDER BY id desc", am.accountID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return []Deployment{}, nil
 	}
@@ -87,19 +89,24 @@ func (am *DeploymentsMapper) GetDeployments() ([]Deployment, error) {
 
 func (am *DeploymentsMapper) GetDeployment(deploymentID int64) (*Deployment, error) {
 	var deployment Deployment
-	err := am.txn.GetContext(am.ctx, &deployment, "SELECT * FROM deployments WHERE accountid = $1 AND id = $2", am.accountID, deploymentID)
+	err := am.txn.GetContext(am.ctx, &deployment, "SELECT * FROM deployments WHERE accountid = $1 AND id = $2 AND deleted_at IS NULL", am.accountID, deploymentID)
 	if err != nil {
 		return nil, err
 	}
 	return &deployment, nil
 }
 
-func (am *DeploymentsMapper) DeleteDeployment(deploymentID int64) error {
+func (am *DeploymentsMapper) DeleteDeployment(deploymentID, userID int64) error {
+
 	if _, err := am.GetDeployment(deploymentID); err != nil {
 		return err
 	}
-	_, err := am.txn.QueryContext(am.ctx, "DELETE FROM deployments WHERE accountid = $1 AND id = $2", am.accountID, deploymentID)
-	if err != nil {
+
+	query := `UPDATE deployments SET  -- TODO: make it update for real
+	deleted_at=CURRENT_TIMESTAMP, deleted_by=$1
+	WHERE id = $2`
+
+	if _, err := am.txn.ExecContext(am.ctx, query, userID, deploymentID); err != nil {
 		return err
 	}
 	return nil
