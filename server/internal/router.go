@@ -30,7 +30,7 @@ func createRouter(db *dat.DB) *mux.Router {
 		Methods(http.MethodGet)
 
 	rv1.HandleFunc("/accounts",
-		contextify(db, apihandlers.AccountsPostHandler)).
+		apihandlers.AccountsPostHandler(db)).
 		Methods(http.MethodPost)
 
 	// Users API

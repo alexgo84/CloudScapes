@@ -1,9 +1,6 @@
 package shared
 
-import (
-	"CloudScapes/pkg/wire"
-	"CloudScapes/server/internal/dat"
-)
+import "CloudScapes/pkg/wire"
 
 // K8sDeployment is a wire.Deployment compiled with the plan that it held a reference to in planid.
 // This means that any null field value in wire.Deployment was replaced with the corresponding value
@@ -62,7 +59,7 @@ type K8sDeployment struct {
 	ConfigMaps []wire.ConfigMap `json:"configMaps"`
 }
 
-func NewK8sDeployment(deploy dat.Deployment, plan dat.Plan) *K8sDeployment {
+func NewK8sDeployment(deploy wire.NewDeployment, plan wire.NewPlan) *K8sDeployment {
 	k8sDeploy := K8sDeployment{
 		Name:     deploy.Name,
 		Replicas: plan.Replicas,

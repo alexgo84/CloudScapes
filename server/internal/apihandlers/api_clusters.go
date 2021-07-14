@@ -6,7 +6,7 @@ import (
 )
 
 func ClustersGetHandler(c *rqctx.Context) rqctx.ResponseHandler {
-	clusters, err := c.Clusters.GetClusters(c.Account.ID)
+	clusters, err := c.Clusters.GetClusters()
 	if err != nil {
 		return c.SendError(err)
 	}
@@ -33,8 +33,8 @@ func ClustersDeleteHandler(c *rqctx.Context) rqctx.ResponseHandler {
 		return c.SendError(err)
 	}
 
-	if err := c.Clusters.DeleteCluster(c.Account.ID, clusterID); err != nil {
-		return c.SendError(convertToAPIIfNeeded("Cluster", clusterID, err))
+	if err := c.Clusters.DeleteCluster(clusterID); err != nil {
+		return c.SendError(convetErrIfNeeded("Cluster", clusterID, err))
 	}
 	return c.SendNothing()
 }

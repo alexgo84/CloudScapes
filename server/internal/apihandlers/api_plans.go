@@ -6,7 +6,7 @@ import (
 )
 
 func PlansGetHandler(c *rqctx.Context) rqctx.ResponseHandler {
-	plans, err := c.Plans.GetPlans(c.Account.ID)
+	plans, err := c.Plans.GetPlans()
 	if err != nil {
 		return c.SendError(err)
 	}
@@ -19,12 +19,12 @@ func PlansPostHandler(c *rqctx.Context) rqctx.ResponseHandler {
 		return c.SendError(err)
 	}
 
-	_, err := c.Clusters.GetCluster(c.Account.ID, newPlan.ClusterID)
+	_, err := c.Clusters.GetCluster(newPlan.ClusterID)
 	if err != nil {
-		return c.SendError(convertToAPIIfNeeded("Cluster", newPlan.ClusterID, err))
+		return c.SendError(convetErrIfNeeded("Cluster", newPlan.ClusterID, err))
 	}
 
-	user, err := c.Plans.CreatePlan(c.Account.ID, newPlan)
+	user, err := c.Plans.CreatePlan(newPlan)
 	if err != nil {
 		return c.SendError(err)
 	}
@@ -43,8 +43,8 @@ func PlansPutHandler(c *rqctx.Context) rqctx.ResponseHandler {
 		return c.SendError(err)
 	}
 
-	if _, err := c.Clusters.GetCluster(c.Account.ID, newPlan.ClusterID); err != nil {
-		return c.SendError(convertToAPIIfNeeded("Cluster", newPlan.ClusterID, err))
+	if _, err := c.Clusters.GetCluster(newPlan.ClusterID); err != nil {
+		return c.SendError(convetErrIfNeeded("Cluster", newPlan.ClusterID, err))
 	}
 
 	user, err := c.Plans.UpdatePlan(planID, newPlan)
@@ -61,8 +61,8 @@ func PlansDeleteHandler(c *rqctx.Context) rqctx.ResponseHandler {
 		return c.SendError(err)
 	}
 
-	if err := c.Plans.DeletePlan(c.Account.ID, planID); err != nil {
-		return c.SendError(convertToAPIIfNeeded("Plan", planID, err))
+	if err := c.Plans.DeletePlan(planID); err != nil {
+		return c.SendError(convetErrIfNeeded("Plan", planID, err))
 	}
 	return c.SendNothing()
 }

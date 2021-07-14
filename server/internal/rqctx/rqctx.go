@@ -33,22 +33,17 @@ func (ctx *Context) InitDBContext(db *dat.DB) error {
 	if err != nil {
 		return err
 	}
-	ctx.txn = txn
-	ctx.DataContext = dat.NewDataContext(ctx.r.Context(), txn)
 
-	acc, err := ctx.Accounts.GetLastAccount()
+	accountMapper := dat.NewAccountsMapper(ctx.r.Context(), txn)
+	ctx.Account, err = accountMapper.GetLastAccount()
 	if err != nil {
 		return err
 	}
 
-	// if there is no account - return
-	if acc == nil {
-		return nil
-	}
+	ctx.txn = txn
+	ctx.DataContext = dat.NewDataContext(ctx.r.Context(), txn, ctx.Account.ID)
 
-	ctx.Account = *acc
-
-	users, err := ctx.Users.GetUsers(acc.ID)
+	users, err := ctx.Users.GetUsers()
 	if err != nil {
 		return err
 	}

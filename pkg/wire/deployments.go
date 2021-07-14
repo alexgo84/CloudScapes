@@ -1,8 +1,6 @@
 package wire
 
 type NewDeployment struct {
-	AccountID int64 `json:"accountId" db:"accountid"`
-
 	Name string `json:"name" db:"name"`
 
 	Replicas  *int64 `json:"replicas" db:"replicas"`

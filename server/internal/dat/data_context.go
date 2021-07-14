@@ -14,12 +14,12 @@ type DataContext struct {
 	Deployments DeploymentsMapper
 }
 
-func NewDataContext(ctx context.Context, txn *sqlx.Tx) DataContext {
+func NewDataContext(ctx context.Context, txn *sqlx.Tx, accountID int64) DataContext {
 	return DataContext{
 		Accounts:    NewAccountsMapper(ctx, txn),
-		Users:       NewUsersMapper(ctx, txn),
-		Clusters:    NewClustersMapper(ctx, txn),
-		Plans:       NewPlansMapper(ctx, txn),
-		Deployments: NewDeploymentsMapper(ctx, txn),
+		Users:       NewUsersMapper(ctx, txn, accountID),
+		Clusters:    NewClustersMapper(ctx, txn, accountID),
+		Plans:       NewPlansMapper(ctx, txn, accountID),
+		Deployments: NewDeploymentsMapper(ctx, txn, accountID),
 	}
 }

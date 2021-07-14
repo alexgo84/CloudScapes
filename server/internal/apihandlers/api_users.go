@@ -6,7 +6,7 @@ import (
 )
 
 func UsersGetHandler(c *rqctx.Context) rqctx.ResponseHandler {
-	accounts, err := c.Users.GetUsers(c.Account.ID)
+	accounts, err := c.Users.GetUsers()
 	if err != nil {
 		return c.SendError(err)
 	}
