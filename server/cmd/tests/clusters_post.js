@@ -20,6 +20,7 @@ addTest('create a new cluster', function (t) {
             accountId: t.state.session.accountId,
         })
         .expect(201)
+        .store('clusterId', 'id')
 })
 
 addTest('get all clusters in account should return 1 clusters', function (t) {
@@ -51,4 +52,20 @@ addTest('get all clusters in account should return both created clusters', funct
     return t.get('/v1/clusters')
         .expect(200)
         .expectLen(null, 2)
+})
+
+addTest('delete first cluster', function (t) {
+    return t.delete(`/v1/clusters/${t.state.clusterId}`)
+        .expect(204)
+})
+
+addTest('delete same cluster will return a 404 NOT_FOUND', function (t) {
+    return t.delete(`/v1/clusters/${t.state.clusterId}`)
+        .expect(404)
+})
+
+addTest('get all clusters in account should return one clusters', function (t) {
+    return t.get('/v1/clusters')
+        .expect(200)
+        .expectLen(null, 1)
 })

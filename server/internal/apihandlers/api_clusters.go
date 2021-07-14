@@ -26,3 +26,15 @@ func ClustersPostHandler(c *rqctx.Context) rqctx.ResponseHandler {
 
 	return c.SendCreated(user)
 }
+
+func ClustersDeleteHandler(c *rqctx.Context) rqctx.ResponseHandler {
+	clusterID, err := c.IdFromPath("clusterId")
+	if err != nil {
+		return c.SendError(err)
+	}
+
+	if err := c.Clusters.DeleteCluster(c.Account.ID, clusterID); err != nil {
+		return c.SendError(convertToAPIIfNeeded("Cluster", clusterID, err))
+	}
+	return c.SendNothing()
+}

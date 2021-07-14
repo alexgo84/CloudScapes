@@ -3,7 +3,6 @@ package apihandlers
 import (
 	"CloudScapes/pkg/wire"
 	"CloudScapes/server/internal/rqctx"
-	"errors"
 	"os"
 )
 
@@ -24,7 +23,7 @@ func AccountsPostHandler(c *rqctx.Context) rqctx.ResponseHandler {
 	if IsProduction() && len(accounts) >= 1 {
 		multipleAccountsError := wire.APIError{
 			StatusCode: 400,
-			Err:        errors.New("only one account may be created in a production environment"),
+			Message:    "only one account may be created in a production environment",
 		}
 		return c.SendError(multipleAccountsError)
 	}

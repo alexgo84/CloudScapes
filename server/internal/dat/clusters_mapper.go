@@ -48,3 +48,23 @@ func (am *ClustersMapper) GetClusters(accountID int64) ([]Cluster, error) {
 	}
 	return clusters, nil
 }
+
+func (am *ClustersMapper) GetCluster(accountID, clusterID int64) (*Cluster, error) {
+	var cluster Cluster
+	err := am.txn.GetContext(am.ctx, &cluster, "select * from clusters WHERE accountid = $1 AND id = $2", accountID, clusterID)
+	if err != nil {
+		return nil, err
+	}
+	return &cluster, nil
+}
+
+func (am *ClustersMapper) DeleteCluster(accountID, clusterID int64) error {
+	if _, err := am.GetCluster(accountID, clusterID); err != nil {
+		return err
+	}
+	_, err := am.txn.QueryContext(am.ctx, "DELETE from clusters WHERE accountid = $1 AND id = $2", accountID, clusterID)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -2,8 +2,10 @@ package server
 
 import (
 	"CloudScapes/pkg/logger"
+	"CloudScapes/pkg/wire"
 	"CloudScapes/server/internal/dat"
 	"CloudScapes/server/internal/rqctx"
+	"errors"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -34,7 +36,14 @@ func contextify(db *dat.DB, h rqctx.Handler) func(w http.ResponseWriter, r *http
 			if err := ctx.Rollback(); err != nil {
 				ctx.ReportError("rollback failed", zap.Error(err))
 			}
-			ctx.MarshalAndWrite(res.Err.Error(), res.StatusCode)
+
+			// in case of API error - we should only write the message to the resopnse
+			var apiErr wire.APIError
+			if errors.As(res.Err, &apiErr) {
+				ctx.MarshalAndWrite(apiErr.Message, res.StatusCode)
+			} else {
+				ctx.MarshalAndWrite(res.Err, res.StatusCode)
+			}
 			return
 
 		default:

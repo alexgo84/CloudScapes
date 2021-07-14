@@ -4,7 +4,6 @@ import (
 	"CloudScapes/pkg/wire"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -12,8 +11,7 @@ import (
 
 func (c *Context) DecodeBody(out interface{}) error {
 	if err := json.NewDecoder(c.r.Body).Decode(&out); err != nil {
-		apiErr := wire.APIError{Err: err, StatusCode: http.StatusBadRequest}
-		return apiErr
+		return wire.NewBadRequestError(err.Error())
 	}
 	return nil
 }

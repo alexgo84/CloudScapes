@@ -45,7 +45,7 @@ func (c *Context) SendError(err error) ResponseHandler {
 		rv = ResponseHandler{
 			StatusCode: apiErr.StatusCode,
 			Obj:        nil,
-			Err:        apiErr.Err,
+			Err:        apiErr,
 		}
 	} else {
 		rv = ResponseHandler{

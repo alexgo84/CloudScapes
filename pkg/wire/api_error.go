@@ -1,25 +1,27 @@
 package wire
 
 import (
-	"errors"
 	"net/http"
 )
 
 type APIError struct {
-	StatusCode int
-	Err        error
+	StatusCode      int
+	Message         string
+	UnderlyingError error
 }
 
 func (e APIError) Error() string {
-	return e.Err.Error()
+	return e.UnderlyingError.Error()
 }
 
 func NewBadRequestError(message string) APIError {
-	err := errors.New(message)
-	return APIError{StatusCode: http.StatusBadRequest, Err: err}
+	return APIError{StatusCode: http.StatusBadRequest, Message: message}
 }
 
-func NewConflictError(message string) APIError {
-	err := errors.New(message)
-	return APIError{StatusCode: http.StatusConflict, Err: err}
+func NewConflictError(message string, err error) APIError {
+	return APIError{StatusCode: http.StatusConflict, Message: message, UnderlyingError: err}
+}
+
+func NewNotFoundError(message string, err error) APIError {
+	return APIError{StatusCode: http.StatusNotFound, Message: message, UnderlyingError: err}
 }

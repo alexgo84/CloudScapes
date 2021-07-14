@@ -37,6 +37,7 @@ func (c *Context) MarshalAndWrite(payload interface{}, status int) []byte {
 		c.writer.WriteHeader(status)
 		return []byte{}
 	}
+
 	marshaled, err := json.Marshal(payload)
 
 	if err != nil {

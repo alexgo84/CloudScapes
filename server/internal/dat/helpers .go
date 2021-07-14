@@ -22,7 +22,7 @@ func namedGet(db namedPreparer, query string, arg interface{}) error {
 	}
 	if err := stmt.Get(arg, arg); err != nil {
 		if msg, ok := isConstraintViolation(err); ok {
-			return wire.NewConflictError(msg)
+			return wire.NewConflictError(msg, err)
 		}
 		return err
 	}

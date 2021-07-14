@@ -51,5 +51,9 @@ func createRouter(db *dat.DB) *mux.Router {
 		contextify(db, apihandlers.ClustersGetHandler)).
 		Methods(http.MethodGet)
 
+	rv1.HandleFunc("/clusters/{clusterId}",
+		contextify(db, apihandlers.ClustersDeleteHandler)).
+		Methods(http.MethodDelete)
+
 	return rootRouter
 }
