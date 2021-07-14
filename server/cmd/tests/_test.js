@@ -9,6 +9,7 @@ const bgMagenta = "\x1b[45m"
 const bgCyan = "\x1b[46m"
 
 const yellow = '\x1b[33m'
+const green = "\x1b[32m"
 const bright = "\x1b[1m"
 const black = "\x1b[30m"
 
@@ -22,7 +23,6 @@ function Test(state) {
 // register requests execution methods
 ['put', 'post', 'get', 'delete'].forEach(function (method) {
   Test.prototype[method] = function (url) {
-    console.log(method, url)
     return new Request(method, url, this.state)
   }
 })
@@ -49,12 +49,13 @@ exports.init = function (state = {}) {
     }
     const [description, fn] = tests[idx]
     fn(t).end(function (err, res) {
+      const reqDescription = `[${res.req.method} ${res.req.path}]`
       if (err) {
-        console.log(`${bgRed}${yellow}not ok:${resetColor} #${idx + 1}: ${description} ${err.stack.replace(/\n/g, '\n# ')}`)
+        console.log(`${bgRed}${yellow}not ok:${resetColor} #${idx + 1} - ${reqDescription} - ${description} ${err.stack.replace(/\n/g, '\n# ')}`)
         process.exit(1)
       }
 
-      console.log(`ok: #${idx + 1} - ${description}`)
+      console.log(`${green}ok${resetColor}: #${idx + 1} - ${reqDescription} - ${description}`)
       runTest(idx + 1)
     })
   }

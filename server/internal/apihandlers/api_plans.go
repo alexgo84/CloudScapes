@@ -42,21 +42,20 @@ func PlansPutHandler(c *rqctx.Context) rqctx.ResponseHandler {
 	if err := c.DecodeBody(&newPlan); err != nil {
 		return c.SendError(err)
 	}
-
 	if _, err := c.Clusters.GetCluster(newPlan.ClusterID); err != nil {
 		return c.SendError(convetErrIfNeeded("Cluster", newPlan.ClusterID, err))
 	}
 
-	user, err := c.Plans.UpdatePlan(planID, newPlan)
+	plan, err := c.Plans.UpdatePlan(planID, newPlan)
 	if err != nil {
 		return c.SendError(err)
 	}
 
-	return c.SendCreated(user)
+	return c.SendOK(plan)
 }
 
 func PlansDeleteHandler(c *rqctx.Context) rqctx.ResponseHandler {
-	planID, err := c.IdFromPath("clusterId")
+	planID, err := c.IdFromPath("planId")
 	if err != nil {
 		return c.SendError(err)
 	}

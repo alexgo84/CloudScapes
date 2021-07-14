@@ -48,7 +48,8 @@ func (am *PlansMapper) UpdatePlan(planID int64, newPlan wire.NewPlan) (*Plan, er
 	p.ID = planID
 	err := namedGet(am.txn, `UPDATE plans SET 
 	name=:name, replicas=:replicas -- replicas, clusterid, cpu_limit, mem_limit, cpu_req, mem_req, database_service_name, database_service_cloud, database_service_plan, env_vars, cron_jobs, config_maps) 
-	WHERE id = :id`, &p)
+	WHERE id = :id
+	RETURNING id, created_at, accountid`, &p)
 	if err != nil {
 		return nil, err
 	}

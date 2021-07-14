@@ -1,5 +1,10 @@
 package wire
 
+import (
+	"encoding/json"
+	"errors"
+)
+
 type CronJob struct {
 	Name            string            `json:"name"`
 	Image           string            `json:"image"`
@@ -23,4 +28,14 @@ type Volume struct {
 type VolumeSource struct {
 	SecretName     *string `json:"secretName"`
 	LocalConfigMap *string `json:"localConfigMap"`
+}
+
+type CronJobs []CronJob
+
+func (cj *CronJobs) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("failed type assertion to []byte")
+	}
+	return json.Unmarshal(b, &cj)
 }

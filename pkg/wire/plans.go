@@ -1,5 +1,10 @@
 package wire
 
+import (
+	"encoding/json"
+	"errors"
+)
+
 type NewPlan struct {
 	Name      string `json:"name" db:"name"`
 	Replicas  int64  `json:"replicas" db:"replicas"`
@@ -14,7 +19,17 @@ type NewPlan struct {
 	DatabaseServiceCloud string `json:"databaseServiceCloud" db:"database_service_cloud"`
 	DatabaseServicePlan  string `json:"databaseServicePlan" db:"database_service_plan"`
 
-	EnvVars    map[string]interface{} `json:"envVars" db:"env_vars"`
-	CronJobs   []CronJob              `json:"cronJobs" db:"cron_jobs"`
-	ConfigMaps []ConfigMap            `json:"configMaps" db:"config_maps"`
+	EnvVars    StringInterfaceMap `json:"envVars" db:"env_vars"`
+	CronJobs   CronJobs           `json:"cronJobs" db:"cron_jobs"`
+	ConfigMaps ConfigMaps         `json:"configMaps" db:"config_maps"`
+}
+
+type StringInterfaceMap map[string]interface{}
+
+func (m *StringInterfaceMap) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("failed type assertion to []byte")
+	}
+	return json.Unmarshal(b, &m)
 }

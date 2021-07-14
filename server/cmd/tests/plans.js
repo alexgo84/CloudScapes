@@ -87,6 +87,7 @@ addTest('fail to create a plan by the same name', function (t) {
             ConfigMaps: [],
         })
         .expect(409)
+        .expectField(null, `Key (accountid, name)=(${t.state.session.accountId}, ${'good plan'}) already exists.`)
 })
 
 addTest('create another cluster', function (t) {
@@ -100,22 +101,54 @@ addTest('create another cluster', function (t) {
 })
 
 addTest('update the plan to switch over all properties', function (t) {
+    const updatedPlan = {
+        name: 'good plan B',
+        Replicas: 4,
+        CPULimit: '101m',
+        MemLimit: '101m',
+        CPUReq: '11m',
+        MemReq: '11m',
+        ClusterID: t.state.clusterId2,
+        DatabaseServiceName: "pg-bad-boys",
+        DatabaseServiceCloud: "gcp-europe-west2",
+        DatabaseServicePlan: "pro",
+        EnvVars: {A: "a", Num: 42},
+        CronJobs: [],
+        ConfigMaps: [],
+    }
     return t.put(`/v1/plans/${t.state.planId}`)
-        .send({
-            name: 'good plan B',
-            accountId: t.state.session.accountId, // this should not change
-            Replicas: 4,
-            CPULimit: '101m',
-            MemLimit: '101m',
-            CPUReq: '11m',
-            MemReq: '11m',
-            ClusterID: t.state.clusterId2,
-            DatabaseServiceName: "pg-bad-boys",
-            DatabaseServiceName: "gcp-europe-west2",
-            DatabaseServicePlan: "pro",
-            EnvVars: {A: "a", Num: 42},
-            CronJobs: [],
-            ConfigMaps: [],
-        })
-        .expect(404)
+        .send(updatedPlan)
+        .expect(200)
+        .expectField('id', t.state.planId)
+        .expectField('accountId', t.state.session.accountId)
+        .expectField('CPULimit', updatedPlan.CPULimit)
+        .expectField('memLimit', updatedPlan.MemLimit)
+        .expectField('CPUReq', updatedPlan.CPUReq)
+        .expectField('memReq', updatedPlan.MemReq)
+        .expectField('clusterID', updatedPlan.ClusterID)
+        .expectField('databaseServiceName', updatedPlan.DatabaseServiceName)
+        .expectField('databaseServiceCloud', updatedPlan.DatabaseServiceCloud)
+        .expectField('databaseServicePlan', updatedPlan.DatabaseServicePlan)
+        .expectField('envVars.A', updatedPlan.EnvVars.A)
+        .expectField('envVars.Num', updatedPlan.EnvVars.Num)
+        .expectLen('configMaps', 0)
+        .expectLen('cronJobs', 0)
+})
+
+addTest('get all plans in account should return only one plan', function (t) {
+    return t.get('/v1/plans')
+        .expect(200)
+        .expectLen(null, 1)
+})
+
+addTest('delete first cluster', function (t) {
+    return t.delete(`/v1/plans/${t.state.planId}`)
+        .expect(204)
+})
+
+
+addTest('get all plans in account should return zero plans', function (t) {
+    return t.get('/v1/plans')
+        .expect(200)
+        .expectLen(null, 0)
 })
