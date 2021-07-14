@@ -1,8 +1,8 @@
 package apihandlers
 
 import (
-	"CloudScapes/internal/server/rqctx"
 	"CloudScapes/pkg/wire"
+	"CloudScapes/server/internal/rqctx"
 )
 
 func UsersGetHandler(c *rqctx.Context) rqctx.ResponseHandler {

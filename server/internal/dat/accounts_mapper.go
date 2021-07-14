@@ -34,7 +34,7 @@ func (am *AccountsMapper) CreateAccount(companyName string) (*Account, error) {
 }
 
 func (am *AccountsMapper) GetAccounts() ([]Account, error) {
-	var accounts []Account
+	accounts := []Account{}
 	err := am.txn.SelectContext(am.ctx, &accounts, "select * from accounts")
 	if err != nil {
 		return nil, err
@@ -45,9 +45,9 @@ func (am *AccountsMapper) GetAccounts() ([]Account, error) {
 //GetLastAccount is a convenience method to provide account isolation before authentication
 // is implemented by alwasy putting the latest account on context
 func (am *AccountsMapper) GetLastAccount() (*Account, error) {
-	var accounts []Account
+	accounts := []Account{}
 	err := am.txn.SelectContext(am.ctx, &accounts, "select * from accounts ORDER BY id desc LIMIT 1")
-	if err != nil {
+	if err != nil || len(accounts) == 0 {
 		return nil, err
 	}
 	return &accounts[0], nil

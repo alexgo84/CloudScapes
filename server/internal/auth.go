@@ -1,9 +1,9 @@
 package server
 
 import (
-	"CloudScapes/internal/server/dat"
-	"CloudScapes/internal/server/rqctx"
 	"CloudScapes/pkg/logger"
+	"CloudScapes/server/internal/dat"
+	"CloudScapes/server/internal/rqctx"
 	"net/http"
 
 	"go.uber.org/zap"

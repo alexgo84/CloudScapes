@@ -3,7 +3,7 @@ package main
 import (
 	"CloudScapes/pkg/logger"
 
-	"CloudScapes/internal/server"
+	server "CloudScapes/server/internal"
 )
 
 func main() {

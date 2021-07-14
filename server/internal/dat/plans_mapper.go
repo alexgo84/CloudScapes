@@ -48,7 +48,7 @@ func (am *PlansMapper) UpdatePlan(planID int64, newPlan wire.NewPlan) (*Plan, er
 }
 
 func (am *PlansMapper) GetPlans(accountID int64) ([]Plan, error) {
-	var plans []Plan
+	plans := []Plan{} // assign to empty array so that no result case does not return null
 	err := am.txn.SelectContext(am.ctx, &plans, "select * from plans WHERE accountid = $1 ORDER BY id desc", accountID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return []Plan{}, nil

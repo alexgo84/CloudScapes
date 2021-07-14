@@ -62,7 +62,7 @@ func (db *DB) RunMigrations(ctx context.Context) error {
 		return err
 	}
 
-	migrationsDirectory := cwd + "/../../internal/server/dat/migrations"
+	migrationsDirectory := cwd + "/../../server/internal/dat/migrations"
 	files, err := ioutil.ReadDir(migrationsDirectory)
 	if err != nil {
 		return err

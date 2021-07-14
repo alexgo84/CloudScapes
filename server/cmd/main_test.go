@@ -1,8 +1,8 @@
 package main
 
 import (
-	"CloudScapes/internal/server"
 	"CloudScapes/pkg/logger"
+	server "CloudScapes/server/internal"
 	"fmt"
 	"os"
 	"os/exec"

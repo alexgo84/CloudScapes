@@ -28,7 +28,7 @@ func NewClustersMapper(ctx context.Context, txn *sqlx.Tx) ClustersMapper {
 	}
 }
 
-func (am *PlansMapper) CreateCluster(newCluster wire.NewCluster) (*Cluster, error) {
+func (am *ClustersMapper) CreateCluster(newCluster wire.NewCluster) (*Cluster, error) {
 	c := Cluster{NewCluster: newCluster}
 	err := namedGet(am.txn, "INSERT INTO clusters (name, accountid) VALUES (:name, :accountid) RETURNING id, created_at", &c)
 	if err != nil {
@@ -37,8 +37,8 @@ func (am *PlansMapper) CreateCluster(newCluster wire.NewCluster) (*Cluster, erro
 	return &c, nil
 }
 
-func (am *PlansMapper) GetClusters(accountID int64) ([]Cluster, error) {
-	var clusters []Cluster
+func (am *ClustersMapper) GetClusters(accountID int64) ([]Cluster, error) {
+	clusters := []Cluster{} // assign to empty array so that no result case does not return null
 	err := am.txn.SelectContext(am.ctx, &clusters, "select * from clusters WHERE accountid = $1 ORDER BY id desc", accountID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return []Cluster{}, nil

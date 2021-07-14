@@ -1,3 +1,0 @@
-# `/cmd/server`
-
-Coming soon!

@@ -1,3 +1,0 @@
-# `/cmd/agent`
-
-Coming soon!

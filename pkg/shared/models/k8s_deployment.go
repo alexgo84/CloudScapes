@@ -1,8 +1,8 @@
 package shared
 
 import (
-	"CloudScapes/internal/server/dat"
 	"CloudScapes/pkg/wire"
+	"CloudScapes/server/internal/dat"
 )
 
 // K8sDeployment is a wire.Deployment compiled with the plan that it held a reference to in planid.
@@ -62,7 +62,7 @@ type K8sDeployment struct {
 	ConfigMaps []wire.ConfigMap `json:"configMaps"`
 }
 
-func NewK8sDeployment(deploy wire.Deployment, plan dat.Plan) *K8sDeployment {
+func NewK8sDeployment(deploy dat.Deployment, plan dat.Plan) *K8sDeployment {
 	k8sDeploy := K8sDeployment{
 		Name:     deploy.Name,
 		Replicas: plan.Replicas,

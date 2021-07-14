@@ -1,8 +1,8 @@
 package server
 
 import (
-	"CloudScapes/internal/server/apihandlers"
-	"CloudScapes/internal/server/dat"
+	"CloudScapes/server/internal/apihandlers"
+	"CloudScapes/server/internal/dat"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -40,6 +40,15 @@ func createRouter(db *dat.DB) *mux.Router {
 
 	rv1.HandleFunc("/users",
 		contextify(db, apihandlers.UsersGetHandler)).
+		Methods(http.MethodGet)
+
+	// Clusters API
+	rv1.HandleFunc("/clusters",
+		contextify(db, apihandlers.ClustersPostHandler)).
+		Methods(http.MethodPost)
+
+	rv1.HandleFunc("/clusters",
+		contextify(db, apihandlers.ClustersGetHandler)).
 		Methods(http.MethodGet)
 
 	return rootRouter

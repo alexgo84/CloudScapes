@@ -1,7 +1,7 @@
 package apihandlers
 
 import (
-	"CloudScapes/internal/server/dat"
+	"CloudScapes/server/internal/dat"
 	"context"
 	"encoding/json"
 	"net/http"

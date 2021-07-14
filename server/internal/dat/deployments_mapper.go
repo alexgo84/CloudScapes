@@ -50,7 +50,7 @@ func (am *DeploymentsMapper) CreateDeployment(newDeployment wire.NewDeployment, 
 }
 
 func (am *DeploymentsMapper) GetDeployment(accountID int64) ([]Deployment, error) {
-	var deployments []Deployment
+	deployments := []Deployment{} // assign to empty array so that no result case does not return null
 	err := am.txn.SelectContext(am.ctx, &deployments, "select * from plans WHERE accountid = $1 ORDER BY id desc", accountID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return []Deployment{}, nil
