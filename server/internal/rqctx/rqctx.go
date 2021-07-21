@@ -1,7 +1,7 @@
 package rqctx
 
 import (
-	"CloudScapes/pkg/shared/redis"
+	"CloudScapes/pkg/redis"
 	"CloudScapes/server/internal/dat"
 	"net/http"
 

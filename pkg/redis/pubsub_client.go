@@ -1,8 +1,10 @@
 package redis
 
 import (
+	"CloudScapes/pkg/shared"
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -84,12 +86,15 @@ func NewPubSubClient(creds *Credentials) (*PubSubClient, error) {
 
 func (ps *PubSubClient) Subscribe(ctx context.Context, channel string) <-chan *redis.Message {
 	ch := ps.redisClient.Subscribe(ctx, channel)
-	ch.ChannelSize(PubSubChannelSize)
-	return ch.Channel()
+	return ch.Channel(redis.WithChannelSize(PubSubChannelSize))
 }
 
-func (ps *PubSubClient) Publish(ctx context.Context, channel string, message []byte) error {
-	rv := ps.redisClient.Publish(ctx, channel, message)
+func (ps *PubSubClient) PublishRequest(ctx context.Context, channel string, req shared.AgentRequest) error {
+	payload, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+	rv := ps.redisClient.Publish(ctx, channel, payload)
 	return rv.Err()
 }
 

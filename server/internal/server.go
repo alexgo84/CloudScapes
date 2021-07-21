@@ -2,7 +2,7 @@ package server
 
 import (
 	l "CloudScapes/pkg/logger"
-	"CloudScapes/pkg/shared/redis"
+	"CloudScapes/pkg/redis"
 	"CloudScapes/server/internal/dat"
 	"CloudScapes/server/internal/rqctx"
 	"context"

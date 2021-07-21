@@ -2,7 +2,7 @@ package agent
 
 import (
 	"CloudScapes/agent/internal/listener"
-	"CloudScapes/pkg/shared/redis"
+	"CloudScapes/pkg/redis"
 	"context"
 	"os"
 )
@@ -26,5 +26,6 @@ func Run() error {
 		return err
 	}
 
-	return l.ListenAndServe()
+	l.ListenAndServe()
+	return nil // should never reach here
 }
