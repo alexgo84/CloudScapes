@@ -82,6 +82,7 @@ addTest('create a deployment', function (t) {
             DatabaseServiceName: "pg-good-boys",
             DatabaseServiceName: "gcp-europe-west1",
             DatabaseServicePlan: "hobbyist",
+            ClusterID: t.state.clusterId,
             EnvVars: {},
             CronJobs: [],
             ConfigMaps: [],
@@ -100,16 +101,16 @@ addTest('fail to create a deployment by the same name', function (t) {
             MemLimit: '100m',
             CPUReq: '10m',
             MemReq: '10m',
-            ClusterID: t.state.clusterId,
+            planId: t.state.planId,
             DatabaseServiceName: "pg-good-boys",
             DatabaseServiceName: "gcp-europe-west1",
             DatabaseServicePlan: "hobbyist",
+            ClusterID: t.state.clusterId,
             EnvVars: {},
             CronJobs: [],
             ConfigMaps: [],
         })
         .expect(409)
-        .expectField(null, `Key (accountid, name)=(${t.state.session.accountId}, ${'some deployment'}) already exists.`)
 })
 
 addTest('create another cluster', function (t) {
@@ -123,36 +124,37 @@ addTest('create another cluster', function (t) {
 })
 
 addTest('update the deployment to switch over all properties', function (t) {
-    const updatedPlan = {
+    const updatedDeployment = {
         name: 'some deployment B',
         Replicas: 4,
         CPULimit: '101m',
         MemLimit: '101m',
         CPUReq: '11m',
         MemReq: '11m',
-        ClusterID: t.state.clusterId2,
         DatabaseServiceName: "pg-bad-boys",
         DatabaseServiceCloud: "gcp-europe-west2",
         DatabaseServicePlan: "pro",
-        EnvVars: {A: "a", Num: 42},
+        PlanID: t.state.planId,
+        ClusterID: t.state.clusterId2,
+        EnvVars: { A: "a", Num: 42 },
         CronJobs: [],
         ConfigMaps: [],
     }
     return t.put(`/v1/deployments/${t.state.deploymentId}`)
-        .send(updatedPlan)
+        .send(updatedDeployment)
         .expect(200)
         .expectField('id', t.state.deploymentId)
         .expectField('accountId', t.state.session.accountId)
-        .expectField('CPULimit', updatedPlan.CPULimit)
-        .expectField('memLimit', updatedPlan.MemLimit)
-        .expectField('CPUReq', updatedPlan.CPUReq)
-        .expectField('memReq', updatedPlan.MemReq)
-        .expectField('clusterID', updatedPlan.ClusterID)
-        .expectField('databaseServiceName', updatedPlan.DatabaseServiceName)
-        .expectField('databaseServiceCloud', updatedPlan.DatabaseServiceCloud)
-        .expectField('databaseServicePlan', updatedPlan.DatabaseServicePlan)
-        .expectField('envVars.A', updatedPlan.EnvVars.A)
-        .expectField('envVars.Num', updatedPlan.EnvVars.Num)
+        .expectField('CPULimit', updatedDeployment.CPULimit)
+        .expectField('memLimit', updatedDeployment.MemLimit)
+        .expectField('CPUReq', updatedDeployment.CPUReq)
+        .expectField('memReq', updatedDeployment.MemReq)
+        .expectField('clusterID', updatedDeployment.ClusterID)
+        .expectField('databaseServiceName', updatedDeployment.DatabaseServiceName)
+        .expectField('databaseServiceCloud', updatedDeployment.DatabaseServiceCloud)
+        .expectField('databaseServicePlan', updatedDeployment.DatabaseServicePlan)
+        .expectField('envVars.A', updatedDeployment.EnvVars.A)
+        .expectField('envVars.Num', updatedDeployment.EnvVars.Num)
         .expectLen('configMaps', 0)
         .expectLen('cronJobs', 0)
 })
@@ -163,11 +165,20 @@ addTest('get all deployments in account should return only one deployment', func
         .expectLen(null, 1)
 })
 
-addTest('delete first cluster', function (t) {
+addTest('fail to delete the plan because it is being referenced from the deployment', function (t) {
+    return t.delete(`/v1/plans/${t.state.planId}`)
+        .expect(409)
+})
+
+addTest('fail to delete second cluster because it is being referenced from the deployment', function (t) {
+    return t.delete(`/v1/clusters/${t.state.clusterId2}`)
+        .expect(409)
+})
+
+addTest('delete the deployment', function (t) {
     return t.delete(`/v1/deployments/${t.state.deploymentId}`)
         .expect(204)
 })
-
 
 addTest('get all deployments in account should return zero deployments', function (t) {
     return t.get('/v1/deployments')

@@ -42,8 +42,10 @@ func contextify(db *dat.DB, h rqctx.Handler) func(w http.ResponseWriter, r *http
 			if errors.As(res.Err, &apiErr) {
 				ctx.MarshalAndWrite(apiErr.Message, res.StatusCode)
 			} else {
-				ctx.MarshalAndWrite(res.Err, res.StatusCode)
+				ctx.ReportError("internal server error", zap.Error(res.Err))
+				ctx.MarshalAndWrite("internal server error", res.StatusCode)
 			}
+
 			return
 
 		default:

@@ -47,10 +47,11 @@ func (am *DeploymentsMapper) CreateDeployment(newDeployment wire.NewDeployment, 
 		AccountID:     am.accountID,
 		CreatedBy:     userID,
 	}
+
 	err := namedGet(am.txn, `INSERT INTO deployments 
-	(accountid, name, replicas, clusterid, cpu_limit, mem_limit, cpu_req, mem_req, database_service_name, database_service_cloud, database_service_deployment, env_vars, cron_jobs, config_maps, image_path, image_sha, exclude_from_updates, planid, salesforce_state) 
+	(created_by, accountid, name, replicas, clusterid, cpu_limit, mem_limit, cpu_req, mem_req, database_service_name, database_service_cloud, database_service_plan, env_vars, cron_jobs, config_maps, image_path, image_sha, exclude_from_updates, planid, salesforce_state) 
 	VALUES 
-	(:accountid, :name, :replicas, :clusterid, :cpu_limit, :mem_limit, :cpu_req, :mem_req, :database_service_name, :database_service_cloud, :database_service_deployment, :env_vars, :cron_jobs, :config_maps, :image_path, :image_sha, :exclude_from_updates, :planid, :salesforce_state) 
+	(:created_by, :accountid, :name, :replicas, :clusterid, :cpu_limit, :mem_limit, :cpu_req, :mem_req, :database_service_name, :database_service_cloud, :database_service_plan, :env_vars, :cron_jobs, :config_maps, :image_path, :image_sha, :exclude_from_updates, :planid, :salesforce_state) 
 	RETURNING id, created_at, accountid`, &d)
 	if err != nil {
 		return nil, err
@@ -65,8 +66,26 @@ func (am *DeploymentsMapper) UpdateDeployment(deploymentID, userID int64, newDep
 		ModifiedBy:    &userID,
 		ID:            deploymentID,
 	}
-	err := namedGet(am.txn, `UPDATE deployments SET  -- TODO: make it update for real
-	name=:name, replicas=:replicas -- accountid, name, replicas, clusterid, cpu_limit, mem_limit, cpu_req, mem_req, database_service_name, database_service_cloud, database_service_deployment, env_vars, cron_jobs, config_maps, image_path, image_sha, exclude_from_updates, planid, salesforce_state
+	err := namedGet(am.txn, `UPDATE deployments SET
+	name=:name, 
+	replicas=:replicas,
+	accountid=:accountid, 
+	clusterid=:clusterid, 
+	cpu_limit=:cpu_limit, 
+	mem_limit=:mem_limit, 
+	cpu_req=:cpu_req, 
+	mem_req=:mem_req, 
+	database_service_name=:database_service_name, 
+	database_service_cloud=:database_service_cloud, 
+	database_service_plan=:database_service_plan, 
+	env_vars=:env_vars, 
+	cron_jobs=:cron_jobs, 
+	config_maps=:config_maps, 
+	image_path=:image_path, 
+	image_sha=:image_sha, 
+	exclude_from_updates=:exclude_from_updates, 
+	planid=:planid, 
+	salesforce_state=:salesforce_state
 	WHERE id = :id
 	RETURNING id, created_at, modified_at, accountid`, &d)
 	if err != nil {

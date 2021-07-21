@@ -4,6 +4,7 @@ import (
 	"CloudScapes/pkg/logger"
 	"encoding/json"
 	"net/http"
+	"runtime/debug"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -13,6 +14,7 @@ import (
 func (ctx *Context) ReportError(msg string, fields ...zapcore.Field) {
 	fields = append(fields, zap.String("uuid", ctx.uuid.String()))
 	logger.Log(logger.ERROR, msg, fields...)
+	debug.PrintStack()
 }
 
 func (ctx *Context) SendAPIError(err error) {

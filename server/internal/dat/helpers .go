@@ -32,7 +32,8 @@ func namedGet(db namedPreparer, query string, arg interface{}) error {
 func isConstraintViolation(err error) (string, bool) {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
-		if pgErr.Code == "23505" {
+		// 23505 - unique_violation, 23503 - foreign_key_violation
+		if pgErr.Code == "23505" || pgErr.Code == "23503" {
 			return pgErr.Detail, true
 		}
 	}

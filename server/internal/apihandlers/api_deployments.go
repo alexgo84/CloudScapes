@@ -33,7 +33,7 @@ func DeploymentsPostHandler(c *rqctx.Context) rqctx.ResponseHandler {
 }
 
 func DeploymentsPutHandler(c *rqctx.Context) rqctx.ResponseHandler {
-	DeploymentID, err := c.IdFromPath("DeploymentId")
+	deploymentID, err := c.IdFromPath("deploymentId")
 	if err != nil {
 		return c.SendError(err)
 	}
@@ -46,7 +46,7 @@ func DeploymentsPutHandler(c *rqctx.Context) rqctx.ResponseHandler {
 		return c.SendError(convetErrIfNeeded("Plan", newDeployment.PlanID, err))
 	}
 
-	Deployment, err := c.Deployments.UpdateDeployment(DeploymentID, c.User.ID, newDeployment)
+	Deployment, err := c.Deployments.UpdateDeployment(deploymentID, c.User.ID, newDeployment)
 	if err != nil {
 		return c.SendError(err)
 	}
@@ -55,13 +55,13 @@ func DeploymentsPutHandler(c *rqctx.Context) rqctx.ResponseHandler {
 }
 
 func DeploymentsDeleteHandler(c *rqctx.Context) rqctx.ResponseHandler {
-	DeploymentID, err := c.IdFromPath("DeploymentId")
+	deploymentID, err := c.IdFromPath("deploymentId")
 	if err != nil {
 		return c.SendError(err)
 	}
 
-	if err := c.Deployments.DeleteDeployment(DeploymentID, c.User.ID); err != nil {
-		return c.SendError(convetErrIfNeeded("Deployment", DeploymentID, err))
+	if err := c.Deployments.DeleteDeployment(deploymentID, c.User.ID); err != nil {
+		return c.SendError(convetErrIfNeeded("Deployment", deploymentID, err))
 	}
 	return c.SendNothing()
 }

@@ -4,8 +4,6 @@ import (
 	"CloudScapes/pkg/wire"
 	"errors"
 	"net/http"
-
-	"go.uber.org/zap"
 )
 
 type ResponseHandler struct {
@@ -55,8 +53,5 @@ func (c *Context) SendError(err error) ResponseHandler {
 		}
 	}
 
-	if rv.StatusCode >= 500 {
-		c.ReportError("internal server error", zap.Error(err))
-	}
 	return rv
 }

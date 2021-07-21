@@ -1,6 +1,5 @@
 'use strict'
 
-const assert = require('assert')
 const dottie = require('dottie')
 
 const SuperTest = require('supertest').Test

@@ -15,11 +15,11 @@ CREATE TABLE IF NOT EXISTS deployments (
     -- deployment
     image_path text,
     image_sha text,
-    exlude_from_updates bool,
+    exclude_from_updates bool,
     planid bigint,
     salesforce_state text,
     replicas int,
-    clusterid bigint NOT NULL,
+    clusterid bigint,
 
     -- resources
     cpu_limit text,

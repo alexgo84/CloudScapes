@@ -22,5 +22,5 @@ type NewDeployment struct {
 
 	EnvVars    StringInterfaceMap `json:"envVars" db:"env_vars"`
 	CronJobs   CronJobs           `json:"cronJobs" db:"cron_jobs"`
-	ConfigMaps []ConfigMap        `json:"configMaps" db:"config_maps"`
+	ConfigMaps ConfigMaps         `json:"configMaps" db:"config_maps"`
 }

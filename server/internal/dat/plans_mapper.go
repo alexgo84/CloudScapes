@@ -46,10 +46,12 @@ func (am *PlansMapper) CreatePlan(newPlan wire.NewPlan) (*Plan, error) {
 func (am *PlansMapper) UpdatePlan(planID int64, newPlan wire.NewPlan) (*Plan, error) {
 	p := Plan{NewPlan: newPlan}
 	p.ID = planID
-	err := namedGet(am.txn, `UPDATE plans SET  -- TODO: make it update for real
-	name=:name, replicas=:replicas -- replicas, clusterid, cpu_limit, mem_limit, cpu_req, mem_req, database_service_name, database_service_cloud, database_service_plan, env_vars, cron_jobs, config_maps) 
+	query := `UPDATE plans SET
+	name=:name, replicas=:replicas, clusterid=:clusterid, cpu_limit=:cpu_limit, mem_limit=:mem_limit, cpu_req=:cpu_req, mem_req=:mem_req, database_service_name=:database_service_name, database_service_cloud=:database_service_cloud, database_service_plan=:database_service_plan, env_vars=:env_vars, cron_jobs=:cron_jobs, config_maps=:config_maps 
 	WHERE id = :id
-	RETURNING id, created_at, accountid, modified_at`, &p)
+	RETURNING id, created_at, accountid`
+
+	err := namedGet(am.txn, query, &p)
 	if err != nil {
 		return nil, err
 	}
@@ -83,6 +85,9 @@ func (am *PlansMapper) DeletePlan(planID int64) error {
 	}
 	_, err := am.txn.QueryContext(am.ctx, "DELETE FROM plans WHERE accountid = $1 AND id = $2", am.accountID, planID)
 	if err != nil {
+		if msg, ok := isConstraintViolation(err); ok {
+			return wire.NewConflictError(msg, err)
+		}
 		return err
 	}
 	return nil

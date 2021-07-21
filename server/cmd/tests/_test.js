@@ -1,6 +1,5 @@
 'use strict'
 
-const util = require('util')
 const Request = require('./_request')
 const AccountTest = require('./_account_test')
 
@@ -51,7 +50,9 @@ exports.init = function (state = {}) {
     fn(t).end(function (err, res) {
       const reqDescription = `[${res.req.method} ${res.req.path}]`
       if (err) {
-        console.log(`${bgRed}${yellow}not ok:${resetColor} #${idx + 1} - ${reqDescription} - ${description} ${err.stack.replace(/\n/g, '\n# ')}`)
+        const responseLiteral = JSON.parse(JSON.stringify(res.text))
+        console.log(`${bgRed}${yellow}not ok:${resetColor} #${idx + 1} - ${reqDescription} - ${description}`)
+        console.dir(JSON.parse(responseLiteral), {depth: null, colors: true})
         process.exit(1)
       }
 

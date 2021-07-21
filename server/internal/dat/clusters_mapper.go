@@ -67,6 +67,9 @@ func (am *ClustersMapper) DeleteCluster(clusterID int64) error {
 	}
 	_, err := am.txn.QueryContext(am.ctx, "DELETE from clusters WHERE accountid = $1 AND id = $2", am.accountID, clusterID)
 	if err != nil {
+		if msg, ok := isConstraintViolation(err); ok {
+			return wire.NewConflictError(msg, err)
+		}
 		return err
 	}
 	return nil

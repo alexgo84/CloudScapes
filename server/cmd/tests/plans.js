@@ -71,8 +71,8 @@ addTest('create a plan', function (t) {
 addTest('fail to create a plan by the same name', function (t) {
     return t.post('/v1/plans')
         .send({
-            name: 'good plan',
-            accountId: t.state.session.accountId,
+            Name: 'good plan',
+            AccountId: t.state.session.accountId,
             Replicas: 3,
             CPULimit: '100m',
             MemLimit: '100m',
@@ -102,7 +102,7 @@ addTest('create another cluster', function (t) {
 
 addTest('update the plan to switch over all properties', function (t) {
     const updatedPlan = {
-        name: 'good plan B',
+        Name: 'good plan B',
         Replicas: 4,
         CPULimit: '101m',
         MemLimit: '101m',
@@ -141,11 +141,26 @@ addTest('get all plans in account should return only one plan', function (t) {
         .expectLen(null, 1)
 })
 
+
 addTest('delete first cluster', function (t) {
+    return t.delete(`/v1/clusters/${t.state.clusterId}`)
+        .expect(204)
+})
+
+addTest('fail to delete second cluster because it is being referenced', function (t) {
+    return t.delete(`/v1/clusters/${t.state.clusterId2}`)
+        .expect(409)
+})
+
+addTest('delete the plan', function (t) {
     return t.delete(`/v1/plans/${t.state.planId}`)
         .expect(204)
 })
 
+addTest('succeed deleting second cluster after refencing plan has been deleted', function (t) {
+    return t.delete(`/v1/clusters/${t.state.clusterId2}`)
+        .expect(204)
+})
 
 addTest('get all plans in account should return zero plans', function (t) {
     return t.get('/v1/plans')
