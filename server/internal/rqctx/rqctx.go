@@ -1,6 +1,7 @@
 package rqctx
 
 import (
+	"CloudScapes/pkg/shared/redis"
 	"CloudScapes/server/internal/dat"
 	"net/http"
 
@@ -11,20 +12,22 @@ import (
 type Handler func(c *Context) ResponseHandler
 
 type Context struct {
-	r       *http.Request
-	writer  http.ResponseWriter
-	txn     *sqlx.Tx
-	uuid    uuid.UUID
-	Account dat.Account
-	User    dat.User
+	r            *http.Request
+	writer       http.ResponseWriter
+	txn          *sqlx.Tx
+	uuid         uuid.UUID
+	Account      dat.Account
+	User         dat.User
+	PubSubClient *redis.PubSubClient
 	dat.DataContext
 }
 
-func NewRequestContext(w http.ResponseWriter, r *http.Request) *Context {
+func NewRequestContext(w http.ResponseWriter, r *http.Request, ps *redis.PubSubClient) *Context {
 	return &Context{
-		r:      r,
-		uuid:   uuid.New(),
-		writer: w,
+		r:            r,
+		uuid:         uuid.New(),
+		writer:       w,
+		PubSubClient: ps,
 	}
 }
 

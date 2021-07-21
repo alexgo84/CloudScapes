@@ -9,8 +9,7 @@ import (
 
 func Run() error {
 
-	creds := redis.NewCredentials("localhost", "", 6379, false)
-	redisClient, err := redis.NewPubSubClient(creds)
+	redisClient, err := redis.NewPubSubClient(nil)
 	if err != nil {
 		return err
 	}

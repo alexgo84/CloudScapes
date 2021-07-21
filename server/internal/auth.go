@@ -2,6 +2,7 @@ package server
 
 import (
 	"CloudScapes/pkg/logger"
+	"CloudScapes/pkg/shared/redis"
 	"CloudScapes/pkg/wire"
 	"CloudScapes/server/internal/dat"
 	"CloudScapes/server/internal/rqctx"
@@ -11,9 +12,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func contextify(db *dat.DB, h rqctx.Handler) func(w http.ResponseWriter, r *http.Request) {
+func contextify(db *dat.DB, ps *redis.PubSubClient, h rqctx.Handler) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := rqctx.NewRequestContext(w, r)
+		ctx := rqctx.NewRequestContext(w, r, ps)
 
 		defer func() {
 			handlePanicRecovery(ctx)

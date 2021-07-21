@@ -46,7 +46,17 @@ type PubSubClient struct {
 	redisClient *redis.Client
 }
 
-func NewPubSubClient(creds Credentials) (*PubSubClient, error) {
+func NewPubSubClient(creds *Credentials) (*PubSubClient, error) {
+
+	// if none are provided use the default redis credentials
+	if creds == nil {
+		creds = &Credentials{
+			hostname: "localhost",
+			port:     6379,
+			password: "",
+			tls:      false,
+		}
+	}
 
 	// Create a new Redis Client
 	redisClient := redis.NewClient(&redis.Options{

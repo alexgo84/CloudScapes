@@ -2,6 +2,7 @@ package server
 
 import (
 	l "CloudScapes/pkg/logger"
+	"CloudScapes/pkg/shared/redis"
 	"CloudScapes/server/internal/dat"
 	"CloudScapes/server/internal/rqctx"
 	"context"
@@ -15,6 +16,16 @@ import (
 
 func Run() error {
 	l.Log(l.INFO, "initializing database")
+
+	pubsub, err := redis.NewPubSubClient(nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := pubsub.Close(); err != nil {
+			l.Log(l.ERROR, "pubsub close failed", l.Err(err))
+		}
+	}()
 
 	db, err := dat.NewDB(context.Background())
 	if err != nil {
@@ -32,7 +43,7 @@ func Run() error {
 	}
 
 	s := &http.Server{
-		Handler:      createRouter(db),
+		Handler:      createRouter(db, pubsub),
 		Addr:         "127.0.0.1:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
