@@ -1,11 +1,14 @@
 package server
 
 import (
+	"CloudScapes/pkg/logger"
 	l "CloudScapes/pkg/logger"
-	"CloudScapes/pkg/redis"
+	"CloudScapes/pkg/pubsub"
+	"CloudScapes/pkg/shared"
 	"CloudScapes/server/internal/dat"
 	"CloudScapes/server/internal/rqctx"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -17,7 +20,7 @@ import (
 func Run() error {
 	l.Log(l.INFO, "initializing database")
 
-	pubsub, err := redis.NewPubSubClient(nil)
+	pubsub, err := pubsub.NewPubSubClient(nil)
 	if err != nil {
 		return err
 	}
@@ -41,6 +44,8 @@ func Run() error {
 	if err := db.RunMigrations(context.Background()); err != nil {
 		return err
 	}
+
+	go startListeningForControlMessages(pubsub, db)
 
 	s := &http.Server{
 		Handler:      createRouter(db, pubsub),
@@ -71,4 +76,26 @@ func handlePanicRecovery(ctx *rqctx.Context) {
 			l.Log(l.ERROR, "failed to rollback error", zap.Error(rErr))
 		}
 	}
+}
+
+func startListeningForControlMessages(pubsub *pubsub.PubSubClient, db *dat.DB) {
+	ctx := context.Background()
+	ch := pubsub.Subscribe(ctx, shared.ControlChannelName)
+	for msg := range ch {
+		payload := []byte(msg.Payload)
+		var agentRes shared.AgentResponse
+		if err := json.Unmarshal(payload, &agentRes); err != nil {
+			logger.Log(logger.ERROR, "failed to read control message", logger.Err(err))
+			continue
+		}
+
+		if err := handleAgentResponse(&agentRes); err != nil {
+			logger.Log(logger.ERROR, "failed to handle control message", logger.Err(err))
+		}
+	}
+}
+
+func handleAgentResponse(res *shared.AgentResponse) error {
+	logger.Log(logger.INFO, "agent says", logger.Any("response", res))
+	return nil
 }

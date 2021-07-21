@@ -2,14 +2,13 @@ package agent
 
 import (
 	"CloudScapes/agent/internal/listener"
-	"CloudScapes/pkg/redis"
-	"context"
+	"CloudScapes/pkg/pubsub"
 	"os"
 )
 
 func Run() error {
 
-	redisClient, err := redis.NewPubSubClient(nil)
+	redisClient, err := pubsub.NewPubSubClient(nil)
 	if err != nil {
 		return err
 	}
@@ -19,9 +18,7 @@ func Run() error {
 		clusterName = "test_cluster"
 	}
 
-	ch := redisClient.Subscribe(context.Background(), clusterName)
-
-	l, err := listener.NewListener(ch, clusterName)
+	l, err := listener.NewListener(redisClient, clusterName)
 	if err != nil {
 		return err
 	}

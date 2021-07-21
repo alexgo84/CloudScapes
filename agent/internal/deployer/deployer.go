@@ -44,9 +44,9 @@ func NewDeployer(asyncMode bool) (*Deployer, error) {
 	}, nil
 }
 
-func (d *Deployer) ApplySpec(ctx context.Context, k8sDeploy *shared.K8sDeployment) error {
+func (d *Deployer) ApplySpec(ctx context.Context, spec *shared.K8sDeployment) error {
 
-	if err := applyNamespace(ctx, d.k8sClient, k8sDeploy); err != nil {
+	if err := applyNamespace(ctx, d.k8sClient, spec); err != nil {
 		return err
 	}
 

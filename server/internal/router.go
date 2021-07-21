@@ -1,7 +1,7 @@
 package server
 
 import (
-	"CloudScapes/pkg/redis"
+	"CloudScapes/pkg/pubsub"
 	"CloudScapes/server/internal/apihandlers"
 	"CloudScapes/server/internal/dat"
 	"net/http"
@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func createRouter(db *dat.DB, ps *redis.PubSubClient) *mux.Router {
+func createRouter(db *dat.DB, ps *pubsub.PubSubClient) *mux.Router {
 	rootRouter := mux.NewRouter()
 	rv1 := rootRouter.PathPrefix("/v1").Subrouter()
 

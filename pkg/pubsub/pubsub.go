@@ -1,4 +1,4 @@
-package redis
+package pubsub
 
 import (
 	"CloudScapes/pkg/shared"
@@ -90,6 +90,15 @@ func (ps *PubSubClient) Subscribe(ctx context.Context, channel string) <-chan *r
 }
 
 func (ps *PubSubClient) PublishRequest(ctx context.Context, channel string, req shared.AgentRequest) error {
+	payload, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+	rv := ps.redisClient.Publish(ctx, channel, payload)
+	return rv.Err()
+}
+
+func (ps *PubSubClient) PublishResponse(ctx context.Context, channel string, req shared.AgentResponse) error {
 	payload, err := json.Marshal(req)
 	if err != nil {
 		return err

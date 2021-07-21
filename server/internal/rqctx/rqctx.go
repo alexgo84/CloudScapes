@@ -1,7 +1,7 @@
 package rqctx
 
 import (
-	"CloudScapes/pkg/redis"
+	"CloudScapes/pkg/pubsub"
 	"CloudScapes/server/internal/dat"
 	"net/http"
 
@@ -18,11 +18,11 @@ type Context struct {
 	uuid         uuid.UUID
 	Account      dat.Account
 	User         dat.User
-	PubSubClient *redis.PubSubClient
+	PubSubClient *pubsub.PubSubClient
 	dat.DataContext
 }
 
-func NewRequestContext(w http.ResponseWriter, r *http.Request, ps *redis.PubSubClient) *Context {
+func NewRequestContext(w http.ResponseWriter, r *http.Request, ps *pubsub.PubSubClient) *Context {
 	return &Context{
 		r:            r,
 		uuid:         uuid.New(),
