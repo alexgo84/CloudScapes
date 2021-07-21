@@ -32,8 +32,9 @@ func TestServer(t *testing.T) {
 		t.Fatal("Could not get working directory")
 	}
 
-	testFolder := fmt.Sprintf("%s/tests", cwd)
-
+	// try to guess the tests folder location
+	splitPath := strings.Split(cwd, "/cloudscapes/")
+	testFolder := splitPath[0] + "/cloudscapes/server/tests/"
 	testFiles := make([]string, 0)
 	if err := filepath.Walk(testFolder, func(path string, f os.FileInfo, err error) error {
 		// test files must end end with .js and not start with _

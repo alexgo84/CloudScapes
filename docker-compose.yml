@@ -11,4 +11,20 @@ services:
         - POSTGRES_USER=cloudscapes
         - POSTGRES_PASSWORD=cloudscapes
         - POSTGRES_DB=cloudscapes
-  
+    networks:
+        - postgres
+    
+  redis:
+    image: "redis:alpine"
+    # The Command will make redis-server run with our custom Configuration
+    command: redis-server 
+    networks:
+        - redis
+
+networks:
+    redis:
+        driver: bridge
+    
+    postgres:
+        driver: bridge
+              

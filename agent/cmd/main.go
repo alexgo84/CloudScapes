@@ -1,8 +1,8 @@
 package main
 
 import (
+	agent "CloudScapes/agent/internal"
 	"CloudScapes/pkg/logger"
-	"errors"
 )
 
 func main() {
@@ -11,5 +11,7 @@ func main() {
 	}
 	defer logger.Flush()
 
-	panic(errors.New("agent not implemented yet"))
+	if err := agent.Run(); err != nil {
+		panic(err)
+	}
 }
