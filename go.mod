@@ -13,4 +13,5 @@ require (
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.18.1
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
+	k8s.io/client-go v0.21.3 // indirect
 )
