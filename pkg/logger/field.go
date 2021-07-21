@@ -16,3 +16,8 @@ func Int64(k string, v int64) zap.Field {
 func Err(err error) zap.Field {
 	return zap.Error(err)
 }
+
+// Any is acting as a facade for a zap field. use in order to not import zap where not needed
+func Any(k string, v interface{}) zap.Field {
+	return zap.Any(k, v)
+}
