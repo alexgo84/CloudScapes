@@ -4,6 +4,7 @@ import (
 	"CloudScapes/agent/internal/deployer"
 	"CloudScapes/pkg/logger"
 	"CloudScapes/pkg/shared"
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -58,10 +59,11 @@ func handleAgentRequest(req []byte) error {
 }
 
 func deployCustomer(deployment *shared.K8sDeployment, asyncMode bool) error {
+	ctx := context.Background()
 	d, err := deployer.NewDeployer(asyncMode)
 	if err != nil {
 		return err
 	}
 
-	return d.ApplySpec(deployment)
+	return d.ApplySpec(ctx, deployment)
 }

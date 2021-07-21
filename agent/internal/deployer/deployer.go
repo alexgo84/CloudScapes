@@ -1,8 +1,8 @@
 package deployer
 
 import (
-	"CloudScapes/pkg/logger"
 	"CloudScapes/pkg/shared"
+	"context"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -44,7 +44,11 @@ func NewDeployer(asyncMode bool) (*Deployer, error) {
 	}, nil
 }
 
-func (d *Deployer) ApplySpec(k8sDeploy *shared.K8sDeployment) error {
-	logger.Log(logger.DEBUG, "DEPLOYING", logger.Any("k8s_deployment", *k8sDeploy))
+func (d *Deployer) ApplySpec(ctx context.Context, k8sDeploy *shared.K8sDeployment) error {
+
+	if err := applyNamespace(ctx, d.k8sClient, k8sDeploy); err != nil {
+		return err
+	}
+
 	return nil
 }
